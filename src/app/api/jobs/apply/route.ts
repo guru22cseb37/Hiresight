@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     const { data, error } = await supabase
       .from("candidates")
       .insert({
-        name: seekerProfile?.name || user.email?.split('@')[0] || "Anonymous Candidate",
+        name: seekerProfile?.name || user?.email?.split('@')[0] || "Anonymous Candidate",
         role: jobTitle,
         company: company,
         ai_score: Math.floor(Math.random() * 30) + 70, // Simulated AI scoring
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
         experience: seekerProfile?.experience || "Not specified",
         location: seekerProfile?.location || "Remote",
         strengths: seekerProfile?.skills || [],
-        recruiter_id: recruiterId || user.id, // Fallback to current user for demo
+        recruiter_id: recruiterId || user?.id, // Fallback to current user for demo
         job_id: jobId
       })
       .select();
