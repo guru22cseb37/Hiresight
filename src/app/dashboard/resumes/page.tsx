@@ -27,15 +27,15 @@ export default function ResumesPage() {
           <h1 className="text-3xl font-bold text-white italic">Resume Vault</h1>
           <p className="text-slate-400 mt-1">Manage and version-control your professional profiles.</p>
         </div>
-        <div className="flex gap-3">
-          <Link href="/dashboard/analyze">
-            <Button variant="outline" className="glass border-white/10 gap-2">
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <Link href="/dashboard/analyze" className="w-full">
+            <Button variant="outline" className="w-full glass border-white/10 gap-2 h-11 md:h-10">
               <Upload className="w-4 h-4" />
               Upload PDF
             </Button>
           </Link>
-          <Link href="/dashboard/resumes/builder">
-            <Button className="bg-blue-600 hover:bg-blue-500 text-white gap-2 shadow-lg shadow-blue-500/20">
+          <Link href="/dashboard/resumes/builder" className="w-full">
+            <Button className="w-full bg-blue-600 hover:bg-blue-500 text-white gap-2 shadow-lg shadow-blue-500/20 h-11 md:h-10">
               <Plus className="w-5 h-5" />
               Build with AI
             </Button>

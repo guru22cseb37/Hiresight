@@ -28,14 +28,14 @@ const chartData = [
   { name: "Sun", score: 88 },
 ];
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function DashboardPage() {
   const [journeyScore, setJourneyScore] = useState(25);
   return (
     <div className="space-y-12 pb-20">
       {/* ELITE HERO SECTION */}
-      <div className="relative p-10 md:p-14 rounded-[40px] bg-slate-900 border border-white/5 overflow-hidden group">
+      <div className="relative p-6 md:p-14 rounded-[32px] md:rounded-[40px] bg-slate-900 border border-white/5 overflow-hidden group">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-blue-600/10 to-transparent pointer-events-none" />
         <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/10 blur-[100px] rounded-full group-hover:bg-blue-500/20 transition-all duration-1000" />
         
@@ -45,32 +45,32 @@ export default function DashboardPage() {
               <Sparkles className="w-3 h-3 text-blue-400" />
               <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Candidate Commander</span>
             </div>
-            <div className="flex flex-col xl:flex-row xl:items-end gap-6">
-              <h1 className="text-5xl font-black text-white italic tracking-tighter leading-none">
+            <div className="flex flex-col xl:flex-row xl:items-end gap-4 md:gap-6">
+              <h1 className="text-3xl md:text-5xl font-black text-white italic tracking-tighter leading-none">
                 COMMAND <span className="text-blue-500">CENTER.</span>
               </h1>
               {/* CAREER JOURNEY ANIMATION */}
-              <div className="flex items-center gap-4 pb-1 group/journey relative">
+              <div className="flex flex-wrap items-center gap-3 md:gap-4 pb-1 group/journey relative">
                  <CareerJourney score={journeyScore} />
                  <Button 
                    variant="ghost" 
                    size="sm" 
                    onClick={() => setJourneyScore((prev) => (prev >= 100 ? 0 : prev + 25))}
-                   className="h-8 px-2 text-[8px] font-black uppercase tracking-widest text-slate-600 hover:text-blue-400 bg-white/5 border border-white/5 rounded-lg ml-2"
+                   className="h-7 px-2 text-[7px] md:text-[8px] font-black uppercase tracking-widest text-slate-600 hover:text-blue-400 bg-white/5 border border-white/5 rounded-lg"
                  >
-                    Simulate Growth
+                    Simulate
                  </Button>
               </div>
             </div>
-            <p className="text-slate-400 text-lg font-medium max-w-md leading-relaxed">
+            <p className="text-slate-400 text-sm md:text-lg font-medium max-w-md leading-relaxed">
               Your profile is currently <span className="text-white font-bold">top 5%</span> in the engineering category.
             </p>
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Link href="/dashboard/analyze">
-              <Button className="h-16 px-10 bg-blue-600 hover:bg-blue-500 text-lg font-black italic rounded-2xl gap-3 shadow-2xl shadow-blue-500/30 transition-all hover:scale-105 active:scale-95">
-                <Plus className="w-6 h-6" />
+          <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+            <Link href="/dashboard/analyze" className="w-full">
+              <Button className="w-full h-14 md:h-16 px-8 md:px-10 bg-blue-600 hover:bg-blue-500 text-base md:text-lg font-black italic rounded-xl md:rounded-2xl gap-3 shadow-2xl shadow-blue-500/30 transition-all hover:scale-105 active:scale-95">
+                <Plus className="w-5 h-5 md:w-6 md:h-6" />
                 NEW ANALYSIS
               </Button>
             </Link>
@@ -323,20 +323,20 @@ function EliteStatCard({ label, value, icon: Icon, trend, description, color }: 
 
   return (
     <motion.div whileHover={{ y: -8, scale: 1.02 }} className="transition-all">
-      <Card className="glass border-white/5 p-7 flex flex-col gap-6 relative overflow-hidden">
+      <Card className="glass border-white/5 p-5 md:p-7 flex flex-col gap-4 md:gap-6 relative overflow-hidden">
         <div className="flex items-center justify-between">
-          <div className={cn("p-3.5 rounded-2xl border", colors[color])}>
-            <Icon className="w-6 h-6" />
+          <div className={cn("p-2.5 md:p-3.5 rounded-xl md:rounded-2xl border", colors[color])}>
+            <Icon className="w-5 h-5 md:w-6 md:h-6" />
           </div>
-          <div className="flex items-center gap-1 text-[11px] font-black text-green-500">
+          <div className="flex items-center gap-1 text-[10px] md:text-[11px] font-black text-green-500">
             {trend}
-            <ArrowUpRight className="w-3 h-3" />
+            <ArrowUpRight className="w-2.5 h-2.5 md:w-3 md:h-3" />
           </div>
         </div>
         <div>
-          <div className="text-4xl font-black text-white italic tracking-tighter leading-none mb-2">{value}</div>
-          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">{label}</p>
-          <p className="text-[10px] text-slate-600 font-medium">{description}</p>
+          <div className="text-3xl md:text-4xl font-black text-white italic tracking-tighter leading-none mb-1 md:mb-2">{value}</div>
+          <p className="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest mb-0.5 md:mb-1">{label}</p>
+          <p className="text-[9px] md:text-[10px] text-slate-600 font-medium">{description}</p>
         </div>
       </Card>
     </motion.div>
@@ -419,18 +419,26 @@ function MissionItem({ title, desc, reward }: any) {
 function CareerJourney({ score }: { score: number }) {
   const isElite = score >= 90;
   const isGrowing = score >= 70 && score < 90;
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
   
   return (
-    <div className="flex flex-col items-start gap-2">
-       <div className="flex items-center gap-3">
-          <div className="w-48 h-10 bg-white/5 rounded-2xl border border-white/5 relative overflow-hidden flex items-center px-4">
+    <div className="flex flex-col items-start gap-2 max-w-full overflow-hidden">
+       <div className="flex items-center gap-2 md:gap-3 w-full">
+          <div className="flex-1 md:w-48 h-8 md:h-10 bg-white/5 rounded-xl md:rounded-2xl border border-white/5 relative overflow-hidden flex items-center px-3 md:px-4 min-w-[140px]">
              {/* Path Line */}
-             <div className="absolute inset-x-4 h-0.5 bg-white/10 rounded-full" />
+             <div className="absolute inset-x-3 md:inset-x-4 h-0.5 bg-white/10 rounded-full" />
              
              {/* Progress Vehicle */}
              <motion.div 
-               initial={{ x: -20 }}
-               animate={{ x: score > 50 ? (score - 20) * 1.5 : 0 }}
+               initial={{ x: -10 }}
+               animate={{ x: score > 50 ? (score - 20) * (isMobile ? 0.8 : 1.5) : 0 }}
                transition={{ duration: 2, ease: "easeInOut" }}
                className="relative z-10"
              >
