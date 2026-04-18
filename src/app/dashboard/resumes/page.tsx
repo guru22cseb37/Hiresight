@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 export default function ResumesPage() {
   const [resumes, setResumes] = useState(MOCK_RESUMES);
@@ -27,14 +28,18 @@ export default function ResumesPage() {
           <p className="text-slate-400 mt-1">Manage and version-control your professional profiles.</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="glass border-white/10 gap-2">
-            <Upload className="w-4 h-4" />
-            Upload PDF
-          </Button>
-          <Button className="bg-blue-600 hover:bg-blue-500 text-white gap-2 shadow-lg shadow-blue-500/20">
-            <Plus className="w-5 h-5" />
-            Build with AI
-          </Button>
+          <Link href="/dashboard/analyze">
+            <Button variant="outline" className="glass border-white/10 gap-2">
+              <Upload className="w-4 h-4" />
+              Upload PDF
+            </Button>
+          </Link>
+          <Link href="/dashboard/resumes/builder">
+            <Button className="bg-blue-600 hover:bg-blue-500 text-white gap-2 shadow-lg shadow-blue-500/20">
+              <Plus className="w-5 h-5" />
+              Build with AI
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -44,15 +49,17 @@ export default function ResumesPage() {
         ))}
         
         {/* Create Token */}
-        <motion.button 
-          whileHover={{ scale: 0.98 }}
-          className="h-[280px] rounded-3xl border-2 border-dashed border-white/5 bg-white/[0.01] flex flex-col items-center justify-center gap-4 text-slate-600 hover:text-blue-400 hover:border-blue-500/20 transition-all group"
-        >
-          <div className="w-12 h-12 rounded-full bg-slate-900 flex items-center justify-center border border-white/5 transition-transform group-hover:scale-110">
-            <Plus className="w-6 h-6" />
-          </div>
-          <span className="text-sm font-bold uppercase tracking-widest">Create New Version</span>
-        </motion.button>
+        <Link href="/dashboard/resumes/builder" className="h-[280px]">
+          <motion.button 
+            whileHover={{ scale: 0.98 }}
+            className="w-full h-full rounded-3xl border-2 border-dashed border-white/5 bg-white/[0.01] flex flex-col items-center justify-center gap-4 text-slate-600 hover:text-blue-400 hover:border-blue-500/20 transition-all group"
+          >
+            <div className="w-12 h-12 rounded-full bg-slate-900 flex items-center justify-center border border-white/5 transition-transform group-hover:scale-110">
+              <Plus className="w-6 h-6" />
+            </div>
+            <span className="text-sm font-bold uppercase tracking-widest">Create New Version</span>
+          </motion.button>
+        </Link>
       </div>
 
       {/* AI Tips Section */}

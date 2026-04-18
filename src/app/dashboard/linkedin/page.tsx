@@ -17,15 +17,32 @@ import { toast } from "sonner";
 export default function LinkedinOptimizerPage() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<any>(null);
+  const [headline, setHeadline] = useState("");
+  const [about, setAbout] = useState("");
 
-  const handleOptimize = () => {
+  const handleOptimize = async () => {
+    if (!headline && !about) {
+      toast.error("Please provide at least a headline or about section.");
+      return;
+    }
+
     setLoading(true);
-    // Simulate LinkedIn analysis
-    setTimeout(() => {
-      setResults(MOCK_LINKEDIN_RESULTS);
-      setLoading(false);
+    try {
+      const res = await fetch("/api/linkedin/optimize", {
+        method: "POST",
+        body: JSON.stringify({ headline, about })
+      });
+      
+      if (!res.ok) throw new Error("Optimization failed");
+      
+      const data = await res.json();
+      setResults(data);
       toast.success("Profile optimized! See the recommendations below.");
-    }, 2000);
+    } catch (err) {
+      toast.error("Failed to optimize profile. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -51,6 +68,8 @@ export default function LinkedinOptimizerPage() {
               <Input 
                 placeholder="e.g. Software Engineer at TechCorp | React & Node" 
                 className="glass border-white/10"
+                value={headline}
+                onChange={(e) => setHeadline(e.target.value)}
               />
             </div>
 
@@ -59,6 +78,8 @@ export default function LinkedinOptimizerPage() {
               <textarea
                 placeholder="Paste your 'About' section here..."
                 className="w-full h-64 bg-slate-950/50 border border-white/5 rounded-2xl p-6 text-slate-300 text-sm leading-relaxed focus:outline-none focus:border-[#0077B5]/50 transition-all resize-none"
+                value={about}
+                onChange={(e) => setAbout(e.target.value)}
               />
             </div>
           </div>

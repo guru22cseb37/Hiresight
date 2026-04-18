@@ -20,6 +20,9 @@ export const metadata: Metadata = {
   description: "Land your dream job or find the perfect candidate with HireSight's AI intelligence platform.",
 };
 
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { ThemeCustomizer } from "@/components/theme/ThemeCustomizer";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -32,10 +35,13 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <CSPostHogProvider>
-          <TooltipProvider>
-            {children}
-            <Toaster position="top-right" closeButton theme="dark" />
-          </TooltipProvider>
+          <ThemeProvider>
+            <TooltipProvider>
+              {children}
+              <ThemeCustomizer />
+              <Toaster position="top-right" closeButton theme="dark" />
+            </TooltipProvider>
+          </ThemeProvider>
         </CSPostHogProvider>
       </body>
     </html>

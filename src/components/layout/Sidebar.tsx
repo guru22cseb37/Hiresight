@@ -33,8 +33,13 @@ export function Sidebar({ role }: SidebarProps) {
     { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
     { name: "Analyze", href: "/dashboard/analyze", icon: FileSearch },
     { name: "Tracker", href: "/dashboard/applications", icon: ClipboardList },
-    { name: "Resumes", href: "/dashboard/resumes", icon: Briefcase },
-    { name: "LaTeX Builder", href: "/dashboard/resumes/latex", icon: FileCode2, badge: "NEW" },
+    { name: "Company Check", href: "/dashboard/company", icon: SearchCode, badge: "NEW" },
+    { name: "Job Board", href: "/dashboard/jobs", icon: Briefcase, badge: "LIVE" },
+    { name: "Networking Pulse", href: "/dashboard/outreach", icon: Send, badge: "AI" },
+    { name: "Skill Gap Radar", href: "/dashboard/skills", icon: BarChart3 },
+    { name: "Negotiator", href: "/dashboard/negotiator", icon: Users },
+    { name: "Resumes", href: "/dashboard/resumes", icon: FileCode2 },
+    { name: "LaTeX Builder", href: "/dashboard/resumes/builder", icon: FileCode2, badge: "PRO" },
     { name: "Mock Interview", href: "/dashboard/mock-interview", icon: Mic },
     { name: "LinkedIn", href: "/dashboard/linkedin", icon: Linkedin },
     { name: "Settings", href: "/dashboard/settings", icon: Settings },
@@ -42,11 +47,14 @@ export function Sidebar({ role }: SidebarProps) {
 
   const recruiterLinks: NavLink[] = [
     { name: "Overview", href: "/recruiter", icon: LayoutDashboard },
-    { name: "Job Postings", href: "/recruiter/jobs", icon: SearchCode },
+    { name: "Interview Intelligence", href: "/recruiter/interviews", icon: Mic, badge: "AI" },
+    { name: "Sourcing HUD", href: "/recruiter/sourcing", icon: SearchCode, badge: "PRO" },
+    { name: "Rapid Screen", href: "/recruiter/rapid-screen", icon: Users, badge: "FAST" },
+    { name: "Job Postings", href: "/recruiter/jobs", icon: Briefcase },
     { name: "New Job", href: "/recruiter/jobs/new", icon: PlusCircle },
     { name: "Analytics", href: "/recruiter/analytics", icon: BarChart3 },
-    { name: "Candidates", href: "/recruiter/candidates", icon: Users },
     { name: "Outreach", href: "/recruiter/outreach", icon: Send },
+    { name: "Brand Builder", href: "/recruiter/brand", icon: Linkedin },
     { name: "Settings", href: "/recruiter/settings", icon: Settings },
   ];
 
