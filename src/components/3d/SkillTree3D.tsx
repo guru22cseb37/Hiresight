@@ -79,8 +79,8 @@ function Node({ position, label, color, unlocked }: any) {
 function Connections() {
   const points = useMemo(() => {
     return edges.map(([start, end]) => [
-      new THREE.Vector3(...nodes[start].position[0], nodes[start].position[1], nodes[start].position[2]),
-      new THREE.Vector3(...nodes[end].position[0], nodes[end].position[1], nodes[end].position[2])
+      new THREE.Vector3(nodes[start].position[0], nodes[start].position[1], nodes[start].position[2]),
+      new THREE.Vector3(nodes[end].position[0], nodes[end].position[1], nodes[end].position[2])
     ]);
   }, []);
 
