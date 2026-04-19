@@ -16,7 +16,12 @@ function Node({ position, label, color, unlocked, onClick, isMissing }: any) {
 
   return (
     <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5}>
-      <group position={position} onClick={onClick} className="cursor-pointer">
+      <group 
+        position={position} 
+        onClick={onClick} 
+        onPointerOver={() => document.body.style.cursor = 'pointer'}
+        onPointerOut={() => document.body.style.cursor = 'auto'}
+      >
         <Sphere ref={meshRef} args={[unlocked ? 0.5 : 0.3, 32, 32]}>
           <meshStandardMaterial 
             color={color} 
