@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { callAI } from "@/lib/ai";
+import { callAI, cleanJSON } from "@/lib/ai";
 
 export async function POST(req: Request) {
   try {
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
       model: "google/gemini-2.0-flash-001"
     });
 
-    return NextResponse.json(JSON.parse(result));
+    return NextResponse.json(JSON.parse(cleanJSON(result)));
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
