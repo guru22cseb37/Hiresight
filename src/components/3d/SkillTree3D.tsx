@@ -5,65 +5,40 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Sphere, Line, Text, Float } from "@react-three/drei";
 import * as THREE from "three";
 
-// Simulated RPG Skill Tree Data
-const nodes = [
-  { id: 0, position: [0, 0, 0], label: "Core Developer", color: "#8B5CF6", unlocked: true },
-  
-  // Frontend Path
-  { id: 1, position: [-2, 2, 0], label: "Frontend", color: "#3B82F6", unlocked: true },
-  { id: 2, position: [-3, 4, 1], label: "React Native", color: "#3B82F6", unlocked: false },
-  { id: 3, position: [-1, 4, -1], label: "WebGL/3D", color: "#3B82F6", unlocked: false },
-
-  // Backend Path
-  { id: 4, position: [2, 2, 0], label: "Backend", color: "#10B981", unlocked: true },
-  { id: 5, position: [3, 4, 1], label: "Microservices", color: "#10B981", unlocked: false },
-  { id: 6, position: [1, 4, -1], label: "Database Internals", color: "#10B981", unlocked: false },
-
-  // Advanced Path
-  { id: 7, position: [0, 6, 0], label: "Principal Architect", color: "#F59E0B", unlocked: false },
-];
-
-const edges = [
-  [0, 1], [0, 4],
-  [1, 2], [1, 3],
-  [4, 5], [4, 6],
-  [2, 7], [3, 7], [5, 7], [6, 7]
-];
-
-function Node({ position, label, color, unlocked }: any) {
+function Node({ position, label, color, unlocked, onClick, isMissing }: any) {
   const meshRef = useRef<THREE.Mesh>(null);
   
   useFrame((state) => {
-    if (meshRef.current && unlocked) {
+    if (meshRef.current) {
       meshRef.current.rotation.y = state.clock.getElapsedTime() * 0.5;
     }
   });
 
   return (
     <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5}>
-      <group position={position}>
-        <Sphere ref={meshRef} args={[unlocked ? 0.4 : 0.2, 32, 32]}>
+      <group position={position} onClick={onClick} className="cursor-pointer">
+        <Sphere ref={meshRef} args={[unlocked ? 0.5 : 0.3, 32, 32]}>
           <meshStandardMaterial 
             color={color} 
             emissive={color} 
-            emissiveIntensity={unlocked ? 2 : 0.2} 
+            emissiveIntensity={unlocked ? 1.5 : (isMissing ? 1 : 0.2)} 
             transparent
-            opacity={unlocked ? 0.9 : 0.3}
-            wireframe={!unlocked}
+            opacity={unlocked ? 0.9 : 0.6}
+            wireframe={!unlocked && !isMissing}
           />
         </Sphere>
         
-        {/* Outer Glow for unlocked nodes */}
-        {unlocked && (
-          <Sphere args={[0.6, 16, 16]}>
-            <meshBasicMaterial color={color} transparent opacity={0.1} />
+        {/* Outer Glow */}
+        {(unlocked || isMissing) && (
+          <Sphere args={[0.7, 16, 16]}>
+            <meshBasicMaterial color={color} transparent opacity={0.15} />
           </Sphere>
         )}
 
         <Text
           position={[0, -0.8, 0]}
           fontSize={0.25}
-          color={unlocked ? "white" : "gray"}
+          color={unlocked ? "white" : (isMissing ? "#FCA5A5" : "gray")}
           anchorX="center"
           anchorY="middle"
           outlineWidth={0.02}
@@ -76,51 +51,96 @@ function Node({ position, label, color, unlocked }: any) {
   );
 }
 
-function Connections() {
+function Connections({ nodes, edges }: { nodes: any[], edges: any[][] }) {
   const points = useMemo(() => {
-    return edges.map(([start, end]) => [
-      new THREE.Vector3(nodes[start].position[0], nodes[start].position[1], nodes[start].position[2]),
-      new THREE.Vector3(nodes[end].position[0], nodes[end].position[1], nodes[end].position[2])
-    ]);
-  }, []);
+    const validEdges = edges.filter(edge => {
+      const start = nodes.find(n => n.id === edge[0]);
+      const end = nodes.find(n => n.id === edge[1]);
+      return start && end;
+    });
+
+    return validEdges.map(edge => {
+      const startNode = nodes.find(n => n.id === edge[0]);
+      const endNode = nodes.find(n => n.id === edge[1]);
+      return {
+        pts: [
+          new THREE.Vector3(startNode.position[0], startNode.position[1], startNode.position[2]),
+          new THREE.Vector3(endNode.position[0], endNode.position[1], endNode.position[2])
+        ],
+        color: startNode.status === "acquired" && endNode.status === "acquired" ? startNode.color : "#666",
+        opacity: startNode.status === "acquired" && endNode.status === "acquired" ? 0.6 : 0.3
+      };
+    });
+  }, [nodes, edges]);
 
   return (
     <>
-      {points.map((pts, i) => {
-        const startNode = nodes[edges[i][0]];
-        const endNode = nodes[edges[i][1]];
-        const isUnlocked = startNode.unlocked && endNode.unlocked;
-        
-        return (
-          <Line
-            key={i}
-            points={pts}
-            color={isUnlocked ? startNode.color : "#333"}
-            lineWidth={isUnlocked ? 2 : 1}
-            dashed={!isUnlocked}
-            dashScale={5}
-            transparent
-            opacity={isUnlocked ? 0.6 : 0.2}
-          />
-        );
-      })}
+      {points.map((connection, i) => (
+        <Line
+          key={i}
+          points={connection.pts}
+          color={connection.color}
+          lineWidth={1.5}
+          transparent
+          opacity={connection.opacity}
+        />
+      ))}
     </>
   );
 }
 
-export function SkillTree3D() {
+export function SkillTree3D({ data, onNodeClick }: { data?: any, onNodeClick?: (node: any) => void }) {
+  // If no data, render a cool placeholder network
+  const skillNodes = useMemo(() => {
+    if (!data?.skillNodes) {
+      return [
+        { id: "core", position: [0, 0, 0], label: "Awaiting Sync...", color: "#3B82F6", status: "acquired" }
+      ];
+    }
+
+    // Assign simple 3D coordinates based on index (golden spiral layout)
+    const count = data.skillNodes.length;
+    return data.skillNodes.map((n: any, i: number) => {
+      const phi = Math.acos(-1 + (2 * i) / count);
+      const theta = Math.sqrt(count * Math.PI) * phi;
+      const r = 3 + (Math.random() * 1.5);
+
+      const x = r * Math.cos(theta) * Math.sin(phi);
+      const y = r * Math.sin(theta) * Math.sin(phi);
+      const z = r * Math.cos(phi);
+
+      const isAcquired = n.status === "acquired";
+      return {
+        ...n,
+        position: [x, y, z],
+        color: isAcquired ? "#10B981" : "#EF4444", // Green if acquired, Red if missing
+        unlocked: isAcquired,
+        isMissing: !isAcquired
+      };
+    });
+  }, [data]);
+
+  const skillEdges = data?.skillEdges || [];
+
   return (
     <div className="w-full h-full relative min-h-[500px]">
-      <Canvas camera={{ position: [0, 2, 8], fov: 60 }} className="rounded-[32px] overflow-hidden">
+      <Canvas camera={{ position: [0, 0, 10], fov: 60 }} className="rounded-[32px] overflow-hidden">
         <color attach="background" args={["#000"]} />
         <ambientLight intensity={0.5} />
         <pointLight position={[10, 10, 10]} intensity={1} />
         <pointLight position={[-10, -10, -10]} intensity={0.5} />
         
-        <group position={[0, -2, 0]}>
-          <Connections />
-          {nodes.map((node) => (
-            <Node key={node.id} {...node} />
+        <group position={[0, 0, 0]}>
+          <Connections nodes={skillNodes} edges={skillEdges} />
+          {skillNodes.map((node: any) => (
+            <Node 
+              key={node.id} 
+              {...node} 
+              onClick={(e: any) => {
+                e.stopPropagation();
+                if (onNodeClick) onNodeClick(node);
+              }}
+            />
           ))}
         </group>
 
@@ -128,7 +148,6 @@ export function SkillTree3D() {
           enablePan={false}
           minDistance={3}
           maxDistance={15}
-          maxPolarAngle={Math.PI / 1.5}
           autoRotate
           autoRotateSpeed={0.5}
         />
@@ -136,9 +155,17 @@ export function SkillTree3D() {
       <div className="absolute top-6 left-6 pointer-events-none">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
           <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-          <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">3D Neural Network</span>
+          <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">
+             {data ? "Dynamic Path Generated" : "3D Neural Network Standby"}
+          </span>
         </div>
       </div>
+      {data && (
+        <div className="absolute bottom-6 left-6 pointer-events-none flex flex-col gap-2">
+           <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-[#10B981]" /><span className="text-xs text-white">Acquired Skill</span></div>
+           <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-[#EF4444]" /><span className="text-xs text-white">Missing Skill (Click to Learn)</span></div>
+        </div>
+      )}
     </div>
   );
 }

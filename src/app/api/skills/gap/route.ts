@@ -26,8 +26,17 @@ export async function POST(req: Request) {
         "culturalGaps": ["string"],
         "bridgePlan": [
           { "action": "string", "reason": "string" }
+        ],
+        "skillNodes": [
+          { "id": "string", "label": "string", "status": "acquired" | "missing" }
+        ],
+        "skillEdges": [
+          ["string", "string"]
         ]
       }
+      
+      For skillNodes: Provide around 8-12 core skills relevant to the target role. Mark the ones the candidate has as "acquired" and the ones they need as "missing".
+      For skillEdges: Connect foundational skills to advanced skills (e.g., ["javascript", "react"]). Use the exact "id" from skillNodes.
     `;
 
     const result = await callAI({

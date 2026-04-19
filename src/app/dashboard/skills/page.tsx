@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { 
   BarChart3, Target, Zap, Sparkles, 
   Loader2, BookOpen, ShieldAlert, Rocket,
-  Search
+  Search, PlayCircle, FileText, CheckCircle, X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -24,6 +24,30 @@ export default function SkillGapPage() {
     targetRole: "",
     currentSkills: ""
   });
+  const [questNode, setQuestNode] = useState<any>(null);
+  const [questLoading, setQuestLoading] = useState(false);
+  const [questData, setQuestData] = useState<any>(null);
+
+  const handleNodeClick = async (node: any) => {
+    if (node.status === "acquired") return; // Only missing skills get quests
+    setQuestNode(node);
+    setQuestData(null);
+    setQuestLoading(true);
+
+    try {
+      const res = await fetch("/api/skills/quest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetRole: formData.targetRole, skillName: node.label })
+      });
+      const data = await res.json();
+      setQuestData(data);
+    } catch (err) {
+      toast.error("Failed to generate quest.");
+    } finally {
+      setQuestLoading(false);
+    }
+  };
 
   const handleAnalyze = async () => {
     if (!formData.targetCompany || !formData.targetRole) {
@@ -60,9 +84,56 @@ export default function SkillGapPage() {
       </div>
 
       {/* 3D Skill Network Visualization */}
-      <Card className="glass border-violet-500/20 p-2 overflow-hidden h-[500px]">
-        <SkillTree3D />
-      </Card>
+      <div className="relative">
+        <Card className="glass border-violet-500/20 p-2 overflow-hidden h-[500px]">
+          <SkillTree3D data={results} onNodeClick={handleNodeClick} />
+        </Card>
+
+        {/* Quest Overlay */}
+        {questNode && (
+          <div className="absolute top-4 right-4 w-96 max-h-[460px] overflow-y-auto glass border-violet-500/50 p-6 rounded-3xl shadow-2xl z-10 animate-in slide-in-from-right-8">
+            <div className="flex justify-between items-start mb-6">
+               <div>
+                  <Badge variant="outline" className="bg-red-500/10 text-red-400 border-red-500/20 mb-2">CRITICAL GAP</Badge>
+                  <h3 className="text-xl font-black text-white italic uppercase tracking-tighter">{questNode.label}</h3>
+               </div>
+               <button onClick={() => setQuestNode(null)} className="p-2 bg-white/5 rounded-full hover:bg-white/10 text-white transition-all"><X className="w-4 h-4" /></button>
+            </div>
+
+            {questLoading ? (
+               <div className="flex flex-col items-center justify-center py-12 text-slate-400">
+                  <Loader2 className="w-8 h-8 animate-spin mb-4 text-violet-500" />
+                  <p className="text-xs font-bold animate-pulse">Generating Hyper-Fast Learning Quest...</p>
+               </div>
+            ) : questData ? (
+               <div className="space-y-6">
+                  <p className="text-xs text-slate-300 leading-relaxed">{questData.description}</p>
+                  
+                  <div className="space-y-3">
+                     <h4 className="text-[10px] font-black uppercase text-violet-400 tracking-widest">Actionable Resources</h4>
+                     {questData.resources.map((res: any, i: number) => (
+                        <a key={i} href={res.url} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-3 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 hover:border-violet-500/30 transition-all group">
+                           {res.type === "Video" ? <PlayCircle className="w-5 h-5 text-red-400" /> : <FileText className="w-5 h-5 text-blue-400" />}
+                           <div className="flex-1 overflow-hidden">
+                              <p className="text-xs font-bold text-white truncate">{res.title}</p>
+                              <p className="text-[9px] text-slate-500">{res.type}</p>
+                           </div>
+                        </a>
+                     ))}
+                  </div>
+
+                  <div className="p-4 bg-violet-500/10 border border-violet-500/20 rounded-xl space-y-2">
+                     <h4 className="text-[10px] font-black uppercase text-violet-400 tracking-widest flex items-center gap-2">
+                        <CheckCircle className="w-3 h-3" /> Weekend Project
+                     </h4>
+                     <p className="text-xs font-bold text-white">{questData.projectIdea.title}</p>
+                     <p className="text-[10px] text-slate-400 leading-relaxed">{questData.projectIdea.description}</p>
+                  </div>
+               </div>
+            ) : null}
+          </div>
+        )}
+      </div>
 
       <div className="grid lg:grid-cols-3 gap-10">
         <Card className="glass border-white/5 p-8 space-y-8 h-fit">
