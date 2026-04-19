@@ -32,13 +32,19 @@ export default function OutreachPage() {
     try {
       const res = await fetch("/api/outreach/generate", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
       });
       const data = await res.json();
+      
+      if (!res.ok || data.error) {
+        throw new Error(data.error || "Generation failed.");
+      }
+      
       setResults(data);
       toast.success("Outreach messages drafted!");
-    } catch (err) {
-      toast.error("Generation failed. Please try again.");
+    } catch (err: any) {
+      toast.error(err.message || "Generation failed. Please try again.");
     } finally {
       setLoading(false);
     }

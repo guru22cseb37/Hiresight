@@ -87,6 +87,7 @@ export async function callAI({
  * Cleans markdown code blocks from AI response string
  */
 export function cleanJSON(text: string): string {
+  if (!text) return "{}";
   return text.replace(/```json/g, "").replace(/```/g, "").trim();
 }
 
