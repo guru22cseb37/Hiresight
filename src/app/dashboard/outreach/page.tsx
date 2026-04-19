@@ -141,16 +141,16 @@ export default function OutreachPage() {
                       <Mail className="w-4 h-4" />
                       <span className="text-[10px] font-black uppercase tracking-widest">Email Draft</span>
                     </div>
-                    <Button variant="ghost" size="sm" onClick={() => copyToClipboard(results.email.body)} className="h-8 text-[9px] font-bold text-slate-500 hover:text-white">
+                    <Button variant="ghost" size="sm" onClick={() => copyToClipboard(results?.email?.body || "")} className="h-8 text-[9px] font-bold text-slate-500 hover:text-white">
                        <Copy className="w-3 h-3 mr-1" /> COPY
                     </Button>
                   </div>
                   <div className="space-y-3">
                     <div className="p-3 bg-white/5 rounded-lg border border-white/5 text-[11px] font-bold text-white">
-                       Subject: {results.email.subject}
+                       Subject: {results?.email?.subject || "No subject generated."}
                     </div>
                     <div className="p-4 bg-slate-950/50 rounded-xl border border-white/5 text-xs leading-relaxed text-slate-400 whitespace-pre-wrap min-h-[150px]">
-                      {results.email.body}
+                      {results?.email?.body || "No email body generated. The AI might have returned an unexpected format."}
                     </div>
                   </div>
                 </Card>
@@ -163,12 +163,12 @@ export default function OutreachPage() {
                       <Linkedin className="w-4 h-4" />
                       <span className="text-[10px] font-black uppercase tracking-widest">LinkedIn / DM Draft</span>
                     </div>
-                    <Button variant="ghost" size="sm" onClick={() => copyToClipboard(results.linkedin)} className="h-8 text-[9px] font-bold text-slate-500 hover:text-white">
+                    <Button variant="ghost" size="sm" onClick={() => copyToClipboard(results?.linkedin || "")} className="h-8 text-[9px] font-bold text-slate-500 hover:text-white">
                        <Copy className="w-3 h-3 mr-1" /> COPY
                     </Button>
                   </div>
                   <div className="p-4 bg-[#0077B5]/5 rounded-xl border border-[#0077B5]/10 text-xs leading-relaxed text-slate-300 italic">
-                    "{results.linkedin}"
+                    "{results?.linkedin || "No LinkedIn message generated."}"
                   </div>
                 </Card>
               </motion.div>
