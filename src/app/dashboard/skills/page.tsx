@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { SkillTree3D } from "@/components/3d/SkillTree3D";
 
 export default function SkillGapPage() {
   const [loading, setLoading] = useState(false);
@@ -57,6 +58,11 @@ export default function SkillGapPage() {
           <p className="text-slate-400 mt-1">Map your DNA against world-class engineering standards.</p>
         </div>
       </div>
+
+      {/* 3D Skill Network Visualization */}
+      <Card className="glass border-violet-500/20 p-2 overflow-hidden h-[500px]">
+        <SkillTree3D />
+      </Card>
 
       <div className="grid lg:grid-cols-3 gap-10">
         <Card className="glass border-white/5 p-8 space-y-8 h-fit">
