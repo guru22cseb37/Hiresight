@@ -88,6 +88,16 @@ export async function callAI({
  */
 export function cleanJSON(text: string): string {
   if (!text) return "{}";
+  
+  // Find the first { and last } to extract the JSON object
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  
+  if (start !== -1 && end !== -1 && end > start) {
+    return text.substring(start, end + 1);
+  }
+  
+  // Fallback for simple markdown cleaning
   return text.replace(/```json/g, "").replace(/```/g, "").trim();
 }
 

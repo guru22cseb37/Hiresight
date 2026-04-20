@@ -18,8 +18,7 @@ export async function POST(req: Request) {
       1. A professional Email subject and body.
       2. A concise, high-impact LinkedIn Connection Request or DM.
       
-      Ensure the messages highlight the candidate's value proposition and why they are interested in ${company}.
-      Return ONLY valid JSON:
+      IMPORTANT: Return ONLY valid JSON in this exact structure:
       {
         "email": { "subject": "string", "body": "string" },
         "linkedin": "string"
@@ -32,7 +31,19 @@ export async function POST(req: Request) {
       model: "google/gemini-2.0-flash-001"
     });
 
-    return NextResponse.json(JSON.parse(cleanJSON(result)));
+    try {
+      const cleaned = cleanJSON(result);
+      return NextResponse.json(JSON.parse(cleaned));
+    } catch (error) {
+      console.error("AI Parse Error:", error, "Raw Result:", result);
+      return NextResponse.json({
+        email: { 
+          subject: `Outreach for ${role} position`,
+          body: "The AI returned an unexpected format. This usually happens when the model is overloaded. Please click generate again!"
+        },
+        linkedin: "Connection request failed to generate. Please try again."
+      });
+    }
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
