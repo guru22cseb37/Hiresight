@@ -20,23 +20,28 @@ import { supabase } from "@/lib/supabase";
 
 export default function MarketIntelligencePage() {
   const [insights, setInsights] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
 
-  useEffect(() => {
-    async function fetchInsights() {
-      const { data, error } = await supabase
-        .from("market_insights")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (!error && data) {
-        setInsights(data);
-      }
-      setLoading(false);
+  const triggerAnalysis = async (query: string = "AI Software Engineering") => {
+    setAnalyzing(true);
+    try {
+      const res = await fetch(`/api/market/analyze?query=${encodeURIComponent(query)}`);
+      if (!res.ok) throw new Error("Analysis failed");
+      const data = await res.json();
+      
+      // Add the new insight to the top of the list
+      setInsights(prev => [{
+        id: Math.random().toString(36).substr(2, 9),
+        created_at: new Date().toISOString(),
+        ...data
+      }, ...prev]);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setAnalyzing(false);
     }
-
-    fetchInsights();
-  }, []);
+  };
 
   return (
     <div className="space-y-12 pb-20">
@@ -68,14 +73,23 @@ export default function MarketIntelligencePage() {
       ) : insights.length === 0 ? (
         <Card className="glass border-dashed border-white/10 p-20 flex flex-col items-center justify-center text-center space-y-6">
            <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center">
-              <Zap className="w-8 h-8 text-slate-600" />
+              {analyzing ? <Sparkles className="w-8 h-8 text-indigo-400 animate-pulse" /> : <Zap className="w-8 h-8 text-slate-600" />}
            </div>
            <div className="space-y-2">
-             <h3 className="text-xl font-bold text-white italic uppercase tracking-tight">Waiting for Data...</h3>
-             <p className="text-slate-500 max-w-xs text-sm">Your n8n automation hasn't pushed any market updates yet.</p>
+             <h3 className="text-xl font-bold text-white italic uppercase tracking-tight">
+               {analyzing ? "AI Analyzing Global Markets..." : "Autonomous Market Intel"}
+             </h3>
+             <p className="text-slate-500 max-w-xs text-sm">
+               {analyzing ? "Synthesizing live data from LinkedIn, Indeed, and Google Jobs..." : "Generate an on-demand market report for your specific career path."}
+             </p>
            </div>
-           <Button variant="outline" className="border-white/10 hover:bg-white/5 text-xs font-black uppercase tracking-widest">
-              Trigger Manual Fetch
+           <Button 
+             onClick={() => triggerAnalysis()}
+             disabled={analyzing}
+             className="bg-indigo-600 hover:bg-indigo-500 text-xs font-black uppercase tracking-widest gap-2"
+           >
+              {analyzing && <Sparkles className="w-4 h-4 animate-spin" />}
+              {analyzing ? "PROCESSING..." : "GENERATE AI REPORT"}
            </Button>
         </Card>
       ) : (
@@ -85,9 +99,9 @@ export default function MarketIntelligencePage() {
             {insights.map((insight, idx) => (
               <motion.div 
                 key={insight.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
               >
                 <Card className="glass border-white/5 p-8 md:p-10 relative overflow-hidden group hover:border-indigo-500/30 transition-all duration-500">
                   <div className="absolute top-0 right-0 p-8 opacity-[0.03] -rotate-12 group-hover:rotate-0 transition-transform duration-1000">
@@ -99,11 +113,11 @@ export default function MarketIntelligencePage() {
                       <div className="flex items-center gap-3 text-slate-500">
                          <Clock className="w-4 h-4" />
                          <span className="text-[10px] font-black uppercase tracking-widest">
-                           {new Date(insight.created_at).toLocaleDateString()}
+                           {new Date(insight.created_at).toLocaleTimeString()}
                          </span>
                       </div>
                       <Badge className="bg-indigo-600/10 text-indigo-400 border-indigo-600/20 text-[9px] font-black uppercase tracking-widest">
-                        LIVE UPDATE
+                        AI GENERATED
                       </Badge>
                     </div>
 
@@ -128,7 +142,7 @@ export default function MarketIntelligencePage() {
                         <div className="space-y-2">
                            <div className="flex items-center gap-2 text-indigo-400">
                               <DollarSign className="w-4 h-4" />
-                              <span className="text-[10px] font-black uppercase tracking-widest">Salary Ceiling</span>
+                              <span className="text-[10px] font-black uppercase tracking-widest">Top Salary</span>
                            </div>
                            <div className="text-3xl font-black text-white italic tracking-tighter">
                               {insight.salary_data.max || "N/A"}
@@ -137,7 +151,7 @@ export default function MarketIntelligencePage() {
                         <div className="space-y-2">
                            <div className="flex items-center gap-2 text-green-400">
                               <TrendingUp className="w-4 h-4" />
-                              <span className="text-[10px] font-black uppercase tracking-widest">Demand Index</span>
+                              <span className="text-[10px] font-black uppercase tracking-widest">Market Status</span>
                            </div>
                            <div className="text-3xl font-black text-white italic tracking-tighter">
                               {insight.salary_data.demand || "Elite"}
@@ -149,6 +163,19 @@ export default function MarketIntelligencePage() {
                 </Card>
               </motion.div>
             ))}
+            
+            {insights.length > 0 && (
+              <div className="flex justify-center">
+                <Button 
+                   onClick={() => triggerAnalysis()}
+                   disabled={analyzing}
+                   variant="ghost" 
+                   className="text-xs font-black text-slate-500 hover:text-indigo-400 uppercase tracking-widest"
+                >
+                  {analyzing ? "Synthesizing..." : "Generate Another Insight"}
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* SIDEBAR WIDGETS */}
