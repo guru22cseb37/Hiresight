@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { 
   Search, Briefcase, MapPin, DollarSign, 
@@ -68,7 +68,32 @@ const MOCK_JOBS = [
 
 export default function JobBoardPage() {
   const [search, setSearch] = useState("");
-  const [applyingId, setApplyingId] = useState<number | null>(null);
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [applyingId, setApplyingId] = useState<string | null>(null);
+
+  const fetchJobs = useCallback(async (query: string) => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`/api/jobs/search?query=${encodeURIComponent(query || "Software Engineer")}`);
+      if (!res.ok) throw new Error("Failed to fetch jobs");
+      const data = await res.json();
+      setJobs(data.jobs || []);
+    } catch (err) {
+      console.error(err);
+      toastAction.error("Failed to load real-time jobs. Using demo data.");
+      // Fallback to some default if API fails
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchJobs(search);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [search, fetchJobs]);
 
   const handleApply = async (job: any) => {
     setApplyingId(job.id);
@@ -170,11 +195,21 @@ export default function JobBoardPage() {
               <Zap className="w-4 h-4 text-yellow-400" />
               Latest Opportunities
             </h2>
-            <span className="text-xs font-bold text-slate-500 tracking-widest">{MOCK_JOBS.length} POSITIONS FOUND</span>
+            <span className="text-xs font-bold text-slate-500 tracking-widest">{jobs.length} POSITIONS FOUND</span>
           </div>
 
           <div className="space-y-4">
-            {MOCK_JOBS.map((job, i) => (
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-20 space-y-4">
+                <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
+                <p className="text-slate-500 font-bold italic tracking-widest animate-pulse">SCANNING GLOBAL JOB MARKETS...</p>
+              </div>
+            ) : jobs.length === 0 ? (
+              <div className="text-center py-20">
+                <p className="text-slate-500">No jobs found for "{search}". Try another search.</p>
+              </div>
+            ) : (
+              jobs.map((job, i) => (
               <motion.div
                 key={job.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -245,11 +280,11 @@ export default function JobBoardPage() {
                            <Bookmark className="w-4 h-4" />
                          </Button>
                           <Button 
-                            onClick={() => handleApply(job)}
+                            onClick={() => job.applyLink ? window.open(job.applyLink, "_blank") : handleApply(job)}
                             disabled={applyingId === job.id}
                             className="bg-blue-600 hover:bg-blue-500 text-[11px] font-black uppercase tracking-widest h-10 px-6 rounded-xl gap-2 active:scale-95 transition-all disabled:opacity-50"
                           >
-                            {applyingId === job.id ? <Loader2 className="w-3 h-3 animate-spin" /> : "Apply Now"}
+                            {applyingId === job.id ? <Loader2 className="w-3 h-3 animate-spin" /> : (job.applyLink ? "External Apply" : "Apply Now")}
                             {applyingId !== job.id && <ExternalLink className="w-3 h-3" />}
                           </Button>
                       </div>
@@ -275,7 +310,7 @@ export default function JobBoardPage() {
                   </div>
                 </Card>
               </motion.div>
-            ))}
+            )))}
           </div>
 
           <div className="flex justify-center pt-8">
