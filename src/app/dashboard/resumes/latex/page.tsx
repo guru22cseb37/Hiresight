@@ -17,7 +17,12 @@ import { stex } from "@codemirror/legacy-modes/mode/stex";
 import { vscodeDark } from "@uiw/codemirror-theme-vscode";
 
 export default function LatexBuilderPage() {
+  const [activeTab, setActiveTab] = useState("preview");
+  const [latexSource, setLatexSource] = useState(DEFAULT_LATEX);
+  const [isCompiling, setIsCompiling] = useState(false);
   const [isOptimizing, setIsOptimizing] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState("Modern Elite");
 
   const handleGenerate = async () => {
     toast.loading("AI is crafting your LaTeX source...");
