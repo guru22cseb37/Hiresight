@@ -15,6 +15,20 @@ import { Badge } from "@/components/ui/badge";
 import { toast as toastAction } from "sonner";
 import { cn } from "@/lib/utils";
 
+interface Job {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  salary: string;
+  type: string;
+  posted: string;
+  matchScore: number;
+  tags: string[];
+  logo: string | null;
+  applyLink?: string;
+}
+
 const MOCK_JOBS = [
   {
     id: 1,
@@ -68,7 +82,7 @@ const MOCK_JOBS = [
 
 export default function JobBoardPage() {
   const [search, setSearch] = useState("");
-  const [jobs, setJobs] = useState<any[]>([]);
+  const [jobs, setJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [applyingId, setApplyingId] = useState<string | null>(null);
 
@@ -95,7 +109,7 @@ export default function JobBoardPage() {
     return () => clearTimeout(timer);
   }, [search, fetchJobs]);
 
-  const handleApply = async (job: any) => {
+  const handleApply = async (job: Job) => {
     setApplyingId(job.id);
     try {
       const res = await fetch("/api/jobs/apply", {
@@ -249,7 +263,7 @@ export default function JobBoardPage() {
                           </div>
                         </div>
                         <div className="flex flex-wrap gap-2 pt-2">
-                          {job.tags.map(tag => (
+                          {job.tags.map((tag: string) => (
                             <span key={tag} className="px-2 py-0.5 rounded-md bg-white/5 text-[9px] font-bold text-slate-500 border border-white/5">
                               {tag}
                             </span>
