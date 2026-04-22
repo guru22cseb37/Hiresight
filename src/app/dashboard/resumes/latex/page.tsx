@@ -54,7 +54,7 @@ export default function LatexBuilderPage() {
         method: "POST",
         body: JSON.stringify({
           latex: latexSource,
-          customInstruction: "Expand all bullet points using STAR method. Ensure it fills exactly one full page. Add structured project breakdowns (Frontend, Backend, AI/LLM, API)."
+          customInstruction: "Expand all bullet points using STAR method. Ensure it fills exactly one full page. Add structured project breakdowns with sections for: Frontend Tools, Backend Tools, AI/LLM Integration, and API Infrastructure."
         })
       });
       const data = await response.json();
@@ -290,12 +290,16 @@ const DEFAULT_LATEX = `\\documentclass[letterpaper,11pt]{article}
 \\usepackage{tabularx}
 \\input{glyphtounicode}
 
+% Set font to Times New Roman equivalent for professional look
+\\usepackage{times}
+
 \\pagestyle{fancy}
 \\fancyhf{} 
 \\fancyfoot{}
 \\renewcommand{\\headrulewidth}{0pt}
 \\renewcommand{\\footrulewidth}{0pt}
 
+% Adjust margins for full page saturation
 \\addtolength{\\oddsidemargin}{-0.5in}
 \\addtolength{\\evensidemargin}{-0.5in}
 \\addtolength{\\textwidth}{1in}
@@ -308,12 +312,14 @@ const DEFAULT_LATEX = `\\documentclass[letterpaper,11pt]{article}
 \\raggedright
 \\setlength{\\tabcolsep}{0in}
 
+% Sections formatting - NO NUMBERING
 \\titleformat{\\section}{
   \\vspace{-4pt}\\scshape\\raggedright\\large
 }{}{0em}{}[\\color{black}\\titlerule \\vspace{-5pt}]
 
 \\pdfgentounicode=1
 
+% Custom commands for consistency
 \\newcommand{\\resumeItem}[1]{
   \\item\\small{
     {#1 \\vspace{-2pt}}
@@ -335,7 +341,7 @@ const DEFAULT_LATEX = `\\documentclass[letterpaper,11pt]{article}
     \\end{tabular*}\\vspace{-7pt}
 }
 
-\\renewcommand\\labelitemii{$\\vcenter{\\hbox{\\tiny$\\bullet$}}$}
+\\renewcommand\\labelitemi{$\\vcenter{\\hbox{\\tiny$\\bullet$}}$}
 
 \\newcommand{\\resumeSubHeadingListStart}{\\begin{itemize}[leftmargin=0.15in, label={}]}
 \\newcommand{\\resumeSubHeadingListEnd}{\\end{itemize}}
@@ -344,50 +350,72 @@ const DEFAULT_LATEX = `\\documentclass[letterpaper,11pt]{article}
 
 \\begin{document}
 
+%----------HEADING----------
 \\begin{center}
-    \\textbf{\\Huge \\scshape John Doe} \\\\ \\vspace{1pt}
-    \\small 123-456-7890 $|$ \\href{mailto:john@example.com}{\\underline{john@example.com}} $|$ 
-    \\href{https://linkedin.com/in/johndoe}{\\underline{linkedin.com/in/johndoe}} $|$
-    \\href{https://github.com/johndoe}{\\underline{github.com/johndoe}}
+    \\textbf{\\Huge \\scshape Guru Prasad} \\\\ \\vspace{1pt}
+    \\small 9345090158 $|$ \\href{mailto:guru@example.com}{\\underline{guru@example.com}} $|$ 
+    \\href{https://guru-portfolio-nine.vercel.app/}{\\underline{portfolio.vercel.app}} $|$
+    \\href{https://github.com/guru22cseb37}{\\underline{github.com/guru22cseb37}}
 \\end{center}
 
-\\section{Education}
-  \\resumeSubHeadingListStart
-    \\resumeSubheading
-      {State University}{San Francisco, CA}
-      {Bachelor of Science in Computer Science}{Aug. 2018 -- May 2022}
-  \\resumeSubHeadingListEnd
+%-----------SUMMARY-----------
+\\section*{Professional Summary}
+\\small{Highly motivated and adaptable final-year engineering student at Velammal College of Engineering and Technology (GPA: 7.21), eager to contribute to a challenging technical role. Developing expertise in Machine Learning, AWS, and DevOps, complemented by a strong foundation in Python, Java, and ethical hacking principles. Eager to apply AI development skills gained through academic projects to contribute to the development of innovative AI solutions.}
 
-\\section{Experience}
+%-----------EDUCATION-----------
+\\section*{Education}
   \\resumeSubHeadingListStart
     \\resumeSubheading
-      {TechCorp Solutions}{Jan. 2022 -- Present}
-      {Senior Full Stack Engineer}{San Francisco, CA}
+      {Velammal College of Engineering and Technology}{Madurai, India}
+      {Bachelor of Engineering in Computer Science}{Aug. 2021 -- May 2025}
       \\resumeItemListStart
-        \\resumeItem{Architected a scalable microservices infrastructure using Next.js and Go, improving system uptime by 99.9\\% and reducing latency by 40\\% across all global endpoints.}
-        \\resumeItem{Led the integration of AI-driven talent matching engines using Gemini Pro, resulting in a 300\\% increase in recruiter efficiency and higher quality candidate placements.}
-        \\resumeItem{Optimized database queries and implemented advanced caching strategies with Redis, slashing page load times from 2.5s to 400ms for a user base of 50k+ daily actives.}
+        \\resumeItem{GPA: 7.21/10.0}
+        \\resumeItem{Relevant Coursework: Data Structures, Machine Learning, AI, DBMS, Computer Networks, Cryptography}
       \\resumeItemListEnd
   \\resumeSubHeadingListEnd
 
-\\section{Projects}
+%-----------PROJECTS-----------
+\\section*{Projects}
     \\resumeSubHeadingListStart
       \\resumeProjectHeading
           {\\textbf{HireSight AI-Native Platform} $|$ \\emph{React, TypeScript, Groq, Supabase}}{Jan. 2023 -- Present}
           \\resumeItemListStart
             \\resumeItem{\\textbf{Frontend Tools:} Developed a high-performance recruiter HUD using Framer Motion and TailwindCSS, achieving a 98\\% Lighthouse performance score.}
             \\resumeItem{\\textbf{Backend Tools:} Engineered a robust real-time data pipeline with Supabase and Edge Functions, handling 5k+ concurrent WebSocket connections.}
-            \\resumeItem{\\textbf{AI/LLM Integration:} Implemented a multi-model fallback network to ensure 100\\% availability for AI market intelligence reports.}
-            \\resumeItem{\\textbf{API Infrastructure:} Designed secure RESTful APIs using Next.js Route Handlers, processing over 1M+ candidate scans monthly.}
+            \\resumeItem{\\textbf{AI/LLM Integration:} Implemented a multi-model fallback network (GPT-4, Llama 3, Gemini) to ensure 100\\% availability for AI market intelligence reports.}
+            \\resumeItem{\\textbf{API Infrastructure:} Designed and documented secure RESTful APIs using Next.js Route Handlers, processing over 1M+ candidate scans monthly.}
+          \\resumeItemListEnd
+
+      \\resumeProjectHeading
+          {\\textbf{Autonomous Sourcing HUD} $|$ \\emph{Python, Selenium, OpenAI}}{June 2023 -- Aug. 2023}
+          \\resumeItemListStart
+            \\resumeItem{\\textbf{Frontend Tools:} Built a sleek dark-mode dashboard for real-time candidate scouting visualization.}
+            \\resumeItem{\\textbf{Backend Tools:} Developed an automated web-scraping engine with Selenium and BeautifulSoup to extract profile data.}
+            \\resumeItem{\\textbf{AI/LLM Integration:} Leveraged GPT-4 for semantic analysis of candidate resumes to match specific job requirements with 95\\% accuracy.}
+            \\resumeItem{\\textbf{API Infrastructure:} Integrated Perplexity API for deep-web talent scouting and real-time market intelligence gathering.}
           \\resumeItemListEnd
     \\resumeSubHeadingListEnd
 
-\\section{Technical Skills}
+%-----------EXPERIENCE-----------
+\\section*{Experience}
+  \\resumeSubHeadingListStart
+    \\resumeSubheading
+      {Technical Intern}{Madurai, India}
+      {Velammal Tech Solutions}{May 2023 -- July 2023}
+      \\resumeItemListStart
+        \\resumeItem{Developed and optimized ML models for predictive maintenance, reducing downtime by 15\\% for client industrial systems.}
+        \\resumeItem{Collaborated with the DevOps team to automate deployment pipelines using AWS and Jenkins.}
+      \\resumeItemListEnd
+  \\resumeSubHeadingListEnd
+
+%-----------TECHNICAL SKILLS-----------
+\\section*{Technical Skills}
  \\begin{itemize}[leftmargin=0.15in, label={}]
     \\small{\\item{
-     \\textbf{Languages}{: Java, Python, SQL, JavaScript, TypeScript} \\\\
-     \\textbf{Frameworks}{: React, Next.js, Node.js, Docker, Kubernetes} \\\\
-     \\textbf{Tools}{: Git, Google Cloud Platform, VS Code}
+     \\textbf{Languages}{: Python, Java, C, SQL (Postgres), JavaScript, TypeScript, HTML/CSS} \\\\
+     \\textbf{Frameworks}{: React, Next.js, Node.js, Express, TailwindCSS, Framer Motion} \\\\
+     \\textbf{Tools}{: AWS, Docker, Jenkins, Git, VS Code, Linux, Ethical Hacking Tools} \\\\
+     \\textbf{AI/ML}{: Scikit-learn, TensorFlow, OpenAI API, Gemini API, Groq, Vector Databases}
     }}
  \\end{itemize}
 
@@ -395,11 +423,11 @@ const DEFAULT_LATEX = `\\documentclass[letterpaper,11pt]{article}
 `;
 
 const MOCK_RESUME_DATA = {
-  name: "John Doe",
-  email: "john@example.com",
-  targetRole: "Senior React Developer",
+  name: "Guru Prasad",
+  email: "guru@example.com",
+  targetRole: "Full Stack AI Engineer",
   experience: [
-    { company: "TechCorp", role: "Senior Engineer", dates: "2020-Present", bullets: ["Built platforms", "Optimized performance"] }
+    { company: "Velammal Tech Solutions", role: "Technical Intern", dates: "2023", bullets: ["Developed ML models", "Automated pipelines"] }
   ],
-  skills: ["React", "TypeScript", "Node.js"]
+  skills: ["Python", "Java", "React", "AWS", "Machine Learning"]
 };
