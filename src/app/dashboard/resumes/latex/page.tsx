@@ -124,7 +124,6 @@ export default function LatexBuilderPage() {
       </div>
 
       <div className="flex-1 grid lg:grid-cols-12 gap-6 overflow-hidden">
-        {/* Panel 1: Templates (2 cols) */}
         <Card className="lg:col-span-2 glass border-white/5 p-4 flex flex-col gap-4 overflow-y-auto">
           <div className="flex items-center justify-between px-2 mb-2">
              <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Templates</h3>
@@ -140,7 +139,6 @@ export default function LatexBuilderPage() {
           ))}
         </Card>
 
-        {/* Panel 2: Editor (5 cols) */}
         <Card className="lg:col-span-5 glass border-white/5 flex flex-col overflow-hidden">
           <div className="p-3 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -172,7 +170,6 @@ export default function LatexBuilderPage() {
           </div>
         </Card>
 
-        {/* Panel 3: Preview/Check (5 cols) */}
         <Card className="lg:col-span-5 glass border-white/5 flex flex-col overflow-hidden">
           <Tabs defaultValue="preview" className="h-full flex flex-col">
             <div className="p-1 border-b border-white/5 bg-white/[0.02]">
@@ -293,24 +290,12 @@ const DEFAULT_LATEX = `\\documentclass[letterpaper,11pt]{article}
 \\usepackage{tabularx}
 \\input{glyphtounicode}
 
-%----------FONT OPTIONS----------
-% sans-serif
-% \\usepackage[sfdefault]{FiraSans}
-% \\usepackage[sfdefault]{roboto}
-% \\usepackage[sfdefault]{noto-sans}
-% \\usepackage[default]{sourcesanspro}
-
-% serif
-% \\usepackage{CormorantGaramond}
-% \\usepackage{charter}
-
 \\pagestyle{fancy}
-\\fancyhf{} % clear all header and footer fields
+\\fancyhf{} 
 \\fancyfoot{}
 \\renewcommand{\\headrulewidth}{0pt}
 \\renewcommand{\\footrulewidth}{0pt}
 
-% Adjust margins
 \\addtolength{\\oddsidemargin}{-0.5in}
 \\addtolength{\\evensidemargin}{-0.5in}
 \\addtolength{\\textwidth}{1in}
@@ -323,16 +308,12 @@ const DEFAULT_LATEX = `\\documentclass[letterpaper,11pt]{article}
 \\raggedright
 \\setlength{\\tabcolsep}{0in}
 
-% Sections formatting
 \\titleformat{\\section}{
   \\vspace{-4pt}\\scshape\\raggedright\\large
 }{}{0em}{}[\\color{black}\\titlerule \\vspace{-5pt}]
 
-% Ensure that generate pdf is machine readable/ATS parsable
 \\pdfgentounicode=1
 
-%-------------------------
-% Custom commands
 \\newcommand{\\resumeItem}[1]{
   \\item\\small{
     {#1 \\vspace{-2pt}}
@@ -354,8 +335,6 @@ const DEFAULT_LATEX = `\\documentclass[letterpaper,11pt]{article}
     \\end{tabular*}\\vspace{-7pt}
 }
 
-\\newcommand{\\resumeSubItem}[1]{\\resumeItem{#1}\\vspace{-4pt}}
-
 \\renewcommand\\labelitemii{$\\vcenter{\\hbox{\\tiny$\\bullet$}}$}
 
 \\newcommand{\\resumeSubHeadingListStart}{\\begin{itemize}[leftmargin=0.15in, label={}]}
@@ -363,22 +342,15 @@ const DEFAULT_LATEX = `\\documentclass[letterpaper,11pt]{article}
 \\newcommand{\\resumeItemListStart}{\\begin{itemize}}
 \\newcommand{\\resumeItemListEnd}{\\end{itemize}\\vspace{-5pt}}
 
-%-------------------------------------------
-%%%%%%  RESUME STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
 \\begin{document}
 
-%----------HEADING----------
 \\begin{center}
     \\textbf{\\Huge \\scshape John Doe} \\\\ \\vspace{1pt}
-    \\small 123-456-7890 $|$ \\href{mailto:x@x.com}{\\underline{john@example.com}} $|$ 
-    \\href{https://linkedin.com/in/x}{\\underline{linkedin.com/in/johndoe}} $|$
-    \\href{https://github.com/x}{\\underline{github.com/johndoe}}
+    \\small 123-456-7890 $|$ \\href{mailto:john@example.com}{\\underline{john@example.com}} $|$ 
+    \\href{https://linkedin.com/in/johndoe}{\\underline{linkedin.com/in/johndoe}} $|$
+    \\href{https://github.com/johndoe}{\\underline{github.com/johndoe}}
 \\end{center}
 
-
-%-----------EDUCATION-----------
 \\section{Education}
   \\resumeSubHeadingListStart
     \\resumeSubheading
@@ -386,8 +358,6 @@ const DEFAULT_LATEX = `\\documentclass[letterpaper,11pt]{article}
       {Bachelor of Science in Computer Science}{Aug. 2018 -- May 2022}
   \\resumeSubHeadingListEnd
 
-
-%-----------EXPERIENCE-----------
 \\section{Experience}
   \\resumeSubHeadingListStart
     \\resumeSubheading
@@ -400,8 +370,6 @@ const DEFAULT_LATEX = `\\documentclass[letterpaper,11pt]{article}
       \\resumeItemListEnd
   \\resumeSubHeadingListEnd
 
-
-%-----------PROJECTS-----------
 \\section{Projects}
     \\resumeSubHeadingListStart
       \\resumeProjectHeading
@@ -409,25 +377,20 @@ const DEFAULT_LATEX = `\\documentclass[letterpaper,11pt]{article}
           \\resumeItemListStart
             \\resumeItem{\\textbf{Frontend Tools:} Developed a high-performance recruiter HUD using Framer Motion and TailwindCSS, achieving a 98\\% Lighthouse performance score.}
             \\resumeItem{\\textbf{Backend Tools:} Engineered a robust real-time data pipeline with Supabase and Edge Functions, handling 5k+ concurrent WebSocket connections.}
-            \\resumeItem{\\textbf{AI/LLM Integration:} Implemented a multi-model fallback network (GPT-4, Llama 3, Gemini) to ensure 100\\% availability for AI market intelligence reports.}
-            \\resumeItem{\\textbf{API Infrastructure:} Designed and documented secure RESTful APIs using Next.js Route Handlers, processing over 1M+ candidate scans monthly.}
+            \\resumeItem{\\textbf{AI/LLM Integration:} Implemented a multi-model fallback network to ensure 100\\% availability for AI market intelligence reports.}
+            \\resumeItem{\\textbf{API Infrastructure:} Designed secure RESTful APIs using Next.js Route Handlers, processing over 1M+ candidate scans monthly.}
           \\resumeItemListEnd
     \\resumeSubHeadingListEnd
 
-
-%-----------TECHNICAL SKILLS-----------
 \\section{Technical Skills}
  \\begin{itemize}[leftmargin=0.15in, label={}]
     \\small{\\item{
-     \\textbf{Languages}{: Java, Python, C/C++, SQL (Postgres), JavaScript, TypeScript, HTML/CSS} \\\\
-     \\textbf{Frameworks}{: React, Next.js, Node.js, Flask, JUnit, Docker, Kubernetes} \\\\
-     \\textbf{Tools}{: Git, Docker, Google Cloud Platform, VS Code, PyCharm, IntelliJ} \\\\
-     \\textbf{Libraries}{: pandas, NumPy, Matplotlib, Framer Motion, TailwindCSS}
+     \\textbf{Languages}{: Java, Python, SQL, JavaScript, TypeScript} \\\\
+     \\textbf{Frameworks}{: React, Next.js, Node.js, Docker, Kubernetes} \\\\
+     \\textbf{Tools}{: Git, Google Cloud Platform, VS Code}
     }}
  \\end{itemize}
 
-
-%-------------------------------------------
 \\end{document}
 `;
 
@@ -440,4 +403,3 @@ const MOCK_RESUME_DATA = {
   ],
   skills: ["React", "TypeScript", "Node.js"]
 };
-
