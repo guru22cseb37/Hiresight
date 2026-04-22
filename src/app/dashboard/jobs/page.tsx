@@ -183,8 +183,15 @@ export default function JobBoardPage() {
             <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest px-1">Job Categories</h3>
             <div className="space-y-2">
               {["Engineering", "Design", "Product", "Marketing", "Data"].map(cat => (
-                <div key={cat} className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 cursor-pointer transition-colors group">
-                  <span className="text-sm font-bold text-slate-400 group-hover:text-white">{cat}</span>
+                <div 
+                  key={cat} 
+                  onClick={() => setSearch(cat)}
+                  className={cn(
+                    "flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all group",
+                    search === cat ? "bg-blue-600/20 text-blue-400 border border-blue-500/20" : "hover:bg-white/5 text-slate-400 hover:text-white"
+                  )}
+                >
+                  <span className="text-sm font-bold group-hover:translate-x-1 transition-transform">{cat}</span>
                   <Badge variant="ghost" className="bg-white/5 border-white/5 text-[9px]">{Math.floor(Math.random() * 50) + 10}</Badge>
                 </div>
               ))}
@@ -194,10 +201,15 @@ export default function JobBoardPage() {
           <Card className="glass border-white/5 p-6 space-y-4">
             <h3 className="text-xs font-black text-blue-400 uppercase tracking-widest">AI Profile Sync</h3>
             <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
-              Based on your Resume, you are a strong match for <span className="text-white font-bold">Cloud & React</span> roles.
+              Based on your Resume, you are a strong match for <button onClick={() => setSearch("Cloud React")} className="text-white font-bold hover:text-blue-400 transition-colors underline underline-offset-4 decoration-blue-500/50">Cloud & React</button> roles.
             </p>
-            <Button variant="outline" size="sm" className="w-full text-[10px] font-black uppercase tracking-widest border-white/10 hover:bg-blue-600 hover:border-blue-600 transition-all">
-              Update Profile
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setSearch("Cloud React")}
+              className="w-full text-[10px] font-black uppercase tracking-widest border-white/10 hover:bg-blue-600 hover:border-blue-600 transition-all"
+            >
+              Search Matches
             </Button>
           </Card>
         </div>
