@@ -48,26 +48,37 @@ export default function SourcingHUDPage() {
 
   const handleExtract = async (candidate: any) => {
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
+      const { data: userData, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !userData?.user) {
         toast.error("Please login to extract assets.");
         return;
       }
 
-      const { error } = await supabase.from("candidates").insert({
+      // Ensure matchScore is a valid number for the 'int' column
+      const score = typeof candidate.matchScore === 'number' 
+        ? Math.round(candidate.matchScore) 
+        : parseInt(candidate.matchScore) || 0;
+
+      const { error: dbError } = await supabase.from("candidates").insert({
         recruiter_id: userData.user.id,
-        name: candidate.name,
-        ai_score: candidate.matchScore,
-        ai_summary: candidate.extractionReason,
-        strengths: candidate.skills,
-        stage: "new"
+        name: candidate.name || "Unknown Candidate",
+        ai_score: score,
+        ai_summary: candidate.extractionReason || "",
+        strengths: candidate.skills || [],
+        stage: "new",
+        notes: `Extracted via Autonomous Sourcing HUD. Current Role: ${candidate.currentRole}`
       });
 
-      if (error) throw error;
+      if (dbError) {
+        console.error("Supabase Database Error:", dbError);
+        throw new Error(dbError.message);
+      }
+
       toast.success(`${candidate.name} has been extracted to your pipeline!`);
     } catch (err: any) {
-      console.error(err);
-      toast.error("Extraction failed: " + err.message);
+      console.error("Detailed Extraction Error:", err);
+      toast.error(`Extraction failed: ${err.message || "Unknown Error"}`);
     }
   };
 
