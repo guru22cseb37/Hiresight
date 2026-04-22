@@ -8,8 +8,55 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Loader2, Download } from "lucide-react";
 
 export default function AnalyticsPage() {
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    setDownloading(true);
+    try {
+      const stats = {
+        reach: "24.8k",
+        interviewRate: "18.2%",
+        timeToHire: "14d",
+        costPerHire: "$1.2k",
+        funnel: {
+          applications: "1,240",
+          screened: "480",
+          interviewed: "124",
+          offered: "28"
+        }
+      };
+
+      const res = await fetch("/api/recruiter/analytics/report", {
+        method: "POST",
+        body: JSON.stringify(stats)
+      });
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      // Create download
+      const blob = new Blob([data.report], { type: "text/plain" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `HireSight_Intelligence_Report_${new Date().toISOString().split('T')[0]}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.success("Intelligence Report downloaded successfully.");
+    } catch (err: any) {
+      toast.error("Failed to generate report: " + err.message);
+    } finally {
+      setDownloading(false);
+    }
+  };
   return (
     <div className="space-y-10">
       {/* Header */}
@@ -19,8 +66,14 @@ export default function AnalyticsPage() {
           <p className="text-slate-400 mt-1">Deep insights into your hiring funnel and team performance.</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="glass border-white/10 text-xs uppercase tracking-widest font-bold">
-            Download Report
+          <Button 
+            onClick={handleDownload}
+            disabled={downloading}
+            variant="outline" 
+            className="glass border-white/10 text-xs uppercase tracking-widest font-bold gap-2"
+          >
+            {downloading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
+            {downloading ? "GENERATING..." : "Download Report"}
           </Button>
           <Button className="bg-blue-600 hover:bg-blue-500 text-white text-xs uppercase tracking-widest font-bold shadow-lg shadow-blue-500/20">
             Last 30 Days
