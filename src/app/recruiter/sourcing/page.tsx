@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
 
 export default function SourcingHUDPage() {
   const [loading, setLoading] = useState(false);
@@ -42,6 +43,31 @@ export default function SourcingHUDPage() {
       toast.error("Sourcing scan failed. Check the grid.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleExtract = async (candidate: any) => {
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) {
+        toast.error("Please login to extract assets.");
+        return;
+      }
+
+      const { error } = await supabase.from("candidates").insert({
+        recruiter_id: userData.user.id,
+        name: candidate.name,
+        ai_score: candidate.matchScore,
+        ai_summary: candidate.extractionReason,
+        strengths: candidate.skills,
+        stage: "new"
+      });
+
+      if (error) throw error;
+      toast.success(`${candidate.name} has been extracted to your pipeline!`);
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Extraction failed: " + err.message);
     }
   };
 
@@ -150,7 +176,10 @@ export default function SourcingHUDPage() {
                                          <ShieldCheck className="w-4 h-4 text-green-500" />
                                          SECURE ASSET
                                       </Button>
-                                      <Button className="flex-1 h-12 bg-blue-600 hover:bg-blue-500 text-white font-black uppercase text-[10px] tracking-widest gap-2 rounded-xl shadow-xl shadow-blue-500/20">
+                                      <Button 
+                                        onClick={() => handleExtract(match)}
+                                        className="flex-1 h-12 bg-blue-600 hover:bg-blue-500 text-white font-black uppercase text-[10px] tracking-widest gap-2 rounded-xl shadow-xl shadow-blue-500/20"
+                                      >
                                          <UserCheck className="w-4 h-4" />
                                          EXTRACT NOW
                                       </Button>

@@ -6,13 +6,18 @@ export async function POST(req: Request) {
     const { dreamCandidate, jobRole } = await req.json();
 
     const prompt = `
-      You are an elite Autonomous Talent Scout.
-      Search through the current "High Value Asset" pool and identify the top 3 candidates that match the "Dream Candidate" description.
+      You are an elite Autonomous Talent Scout with real-time web access.
+      TASK: Search the web (LinkedIn, GitHub, X, Portfolios) to find REAL candidates that match the following requirements.
       
       JOB ROLE: ${jobRole}
       DREAM CANDIDATE DESCRIPTION: ${dreamCandidate}
       
-      Since this is a demo, generate 3 hyper-realistic, high-quality candidate matches with specific "Extraction Reasons".
+      Find 3 real or highly probable elite profiles. For each, provide:
+      - Full Name
+      - Current Role & Company
+      - A match score (percentage)
+      - A detailed "Extraction Reason" based on their specific background.
+      - Key Skills they possess.
       
       Return ONLY valid JSON:
       {
@@ -31,7 +36,7 @@ export async function POST(req: Request) {
     const result = await callAI({
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" },
-      model: "google/gemini-2.0-flash-001"
+      model: "perplexity/llama-3.1-sonar-small-128k-online"
     });
 
     return NextResponse.json(JSON.parse(cleanJSON(result)));
