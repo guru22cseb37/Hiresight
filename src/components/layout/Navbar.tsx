@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 
@@ -12,12 +13,7 @@ export function Navbar() {
       className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 glass"
     >
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center font-bold text-white">
-          H
-        </div>
-        <span className="text-xl font-bold tracking-tight text-white hover:text-blue-400 transition-colors">
-          HireSight
-        </span>
+        <Logo variant="full" size={32} />
       </div>
 
       <div className="hidden md:flex items-center gap-8">

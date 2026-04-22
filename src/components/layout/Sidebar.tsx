@@ -6,9 +6,11 @@ import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, FileSearch, ClipboardList, Briefcase, 
   FileCode2, Mic, Linkedin, Settings, LogOut, Menu, X,
-  PlusCircle, Users, BarChart3, Send, SearchCode
+  PlusCircle, Users, BarChart3, Send, SearchCode, Globe
 } from "lucide-react";
+import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/button";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase, Role } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
@@ -33,6 +35,7 @@ export function Sidebar({ role }: SidebarProps) {
     { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
     { name: "Analyze", href: "/dashboard/analyze", icon: FileSearch },
     { name: "Tracker", href: "/dashboard/applications", icon: ClipboardList },
+    { name: "Market Intel", href: "/dashboard/market", icon: Globe, badge: "LIVE" },
     { name: "Company Check", href: "/dashboard/company", icon: SearchCode, badge: "NEW" },
     { name: "Job Board", href: "/dashboard/jobs", icon: Briefcase, badge: "LIVE" },
     { name: "Networking Pulse", href: "/dashboard/outreach", icon: Send, badge: "AI" },
@@ -95,9 +98,7 @@ export function Sidebar({ role }: SidebarProps) {
       `}>
         {/* Logo */}
         <div className="p-6 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20">
-            H
-          </div>
+          <Logo variant="icon" size={40} />
           <div>
             <span className="text-lg font-bold text-white tracking-widest block uppercase leading-none">HireSight</span>
             <span className="text-[10px] text-slate-500 uppercase tracking-widest mt-1 block">
