@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
 export default function CandidatesPage() {
   const [candidates, setCandidates] = useState<any[]>([]);
@@ -59,6 +60,36 @@ export default function CandidatesPage() {
     }
   };
 
+  const exportToCSV = () => {
+    if (candidates.length === 0) {
+      toast.error("No candidates to export.");
+      return;
+    }
+
+    const headers = ["Name", "Role", "Status", "Experience", "Score", "Location", "Tags"];
+    const rows = candidates.map(c => [
+      `"${c.name}"`,
+      `"${c.targetRole}"`,
+      `"${c.status}"`,
+      `"${c.experience}"`,
+      c.score,
+      `"${c.location}"`,
+      `"${(c.tags || []).join(', ')}"`
+    ]);
+
+    const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `HireSight_Candidates_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success("Candidate database exported to CSV.");
+  };
+
   return (
     <div className="space-y-10">
       {/* Header */}
@@ -68,7 +99,11 @@ export default function CandidatesPage() {
           <p className="text-slate-400 mt-1">Manage all your active candidates and talent pools in one place.</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="glass border-white/10 gap-2">
+          <Button 
+            onClick={exportToCSV}
+            variant="outline" 
+            className="glass border-white/10 gap-2"
+          >
             <Download className="w-4 h-4" />
             Export CSV
           </Button>
