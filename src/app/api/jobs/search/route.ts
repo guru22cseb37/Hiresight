@@ -5,10 +5,11 @@ export async function GET(request: Request) {
   const query = searchParams.get("query") || "Software Engineer";
   const page = searchParams.get("page") || "1";
   
-  const apiKey = process.env.NEXT_PUBLIC_RAPIDAPI_KEY;
-  const apiHost = process.env.NEXT_PUBLIC_RAPIDAPI_HOST;
+  const apiKey = process.env.RAPIDAPI_KEY;
+  const apiHost = process.env.RAPIDAPI_HOST;
 
   if (!apiKey || !apiHost) {
+    console.error("Missing RapidAPI credentials in .env.local");
     return NextResponse.json({ error: "API credentials not configured" }, { status: 500 });
   }
 
@@ -25,7 +26,8 @@ export async function GET(request: Request) {
     );
 
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = await response.json().catch(() => ({}));
+      console.error("RapidAPI Error:", response.status, errorData);
       return NextResponse.json({ error: errorData.message || "Failed to fetch jobs" }, { status: response.status });
     }
 
