@@ -3,24 +3,25 @@ import { callAI, cleanJSON } from "@/lib/ai";
 
 export async function POST(req: Request) {
   try {
-    const { latex, audit } = await req.json();
+    const { latex, audit, customInstruction } = await req.json();
 
     const prompt = `
-      You are an elite LaTeX resume architect. 
-      You are given a LaTeX resume and its ATS Audit report.
+      You are an elite LaTeX resume architect and career strategist. 
+      You are given a LaTeX resume and optional enhancement instructions.
       
       LATEX CODE:
       ${latex}
       
-      ATS AUDIT REPORT:
-      ${JSON.stringify(audit)}
+      ${audit ? `ATS AUDIT REPORT: ${JSON.stringify(audit)}` : ""}
       
-      Task:
-      Rewrite the LaTeX code to implement ALL improvements suggested in the audit report.
-      1. Integrate missing keywords naturally into experience or skills.
-      2. Fix formatting issues.
-      3. Follow all improvement tips.
-      4. Ensure the LaTeX remains compilable and professional.
+      ${customInstruction ? `CUSTOM ENHANCEMENT INSTRUCTION: ${customInstruction}` : "GENERAL TASK: Enhance the resume content to be more professional, expand bullet points using the STAR method, and ensure it fills a full A4 page."}
+      
+      Requirements:
+      1. Expand all project and experience descriptions to be high-impact achievemenets.
+      2. If sections are thin, expand them with professional details to ensure the resume fills a full page.
+      3. Integrate structured project breakdowns (Frontend, Backend, AI/LLM, API) if applicable.
+      4. Fix all formatting and ensure valid, compilable LaTeX.
+      5. MAINTAIN ATS COMPATIBILITY. Single column, searchable text.
       
       Output ONLY the corrected LaTeX code. No conversational text.
     `;
