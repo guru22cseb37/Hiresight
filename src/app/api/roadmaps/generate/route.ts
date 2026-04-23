@@ -6,23 +6,28 @@ export async function POST(req: Request) {
     const { role, company, currentSkills } = await req.json();
 
     const prompt = `
-      You are a world-class Elite Career Coach and Engineering Lead. 
-      Generate a tactical, 3-step learning roadmap to help a candidate land a ${role} position at ${company}.
+      You are a world-class Elite Career Architect and Engineering Lead. 
+      Generate a COMPLETE, comprehensive, top-to-bottom learning roadmap to help a candidate land a ${role} position at ${company}.
+      
+      CRITICAL INSTRUCTION: This must be a master-level roadmap covering everything from foundations to elite-level specialization.
       The candidate currently knows: ${currentSkills}.
+      If the candidate is a beginner, the first few steps MUST be fundamental (e.g. basic programming, math, logic).
+      
+      Generate between 6 to 10 logical steps. Each step should be a significant milestone.
 
       Return ONLY a JSON object in this EXACT format:
       {
         "role": "${role}",
         "company": "${company}",
-        "progress": number (0-100),
+        "progress": number (initially low, e.g. 0-10),
         "steps": [
           {
-            "title": "Short catchy title",
-            "description": "Specific tactical goal",
+            "title": "Clear, professional milestone title",
+            "description": "Detailed explanation of what to master in this phase and why it matters for ${company}.",
             "status": "pending",
-            "duration": "e.g. 3 days",
+            "duration": "e.g. 2 weeks",
             "resources": [
-              { "type": "Video" | "Paper" | "Docs" | "Repo", "title": "Real or plausible resource name", "url": "URL" }
+              { "type": "Video" | "Paper" | "Docs" | "Repo" | "Course", "title": "High-quality resource name", "url": "URL" }
             ]
           }
         ]
