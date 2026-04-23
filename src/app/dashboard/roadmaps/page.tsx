@@ -1,56 +1,114 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   Rocket, BookOpen, CheckCircle2, Circle, 
   ArrowRight, ExternalLink, Zap, Sparkles,
-  Trophy, GraduationCap, PlayCircle, FileText
+  Trophy, GraduationCap, PlayCircle, FileText,
+  Loader2, Target, Plus
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-
-const MOCK_ROADMAP = {
-  role: "Senior AI Engineer",
-  company: "Anthropic",
-  progress: 35,
-  steps: [
-    {
-      title: "Mastering Flash Attention",
-      description: "Deep dive into the CUDA implementation of memory-efficient attention mechanisms.",
-      status: "completed",
-      duration: "3 days",
-      resources: [
-        { type: "Paper", title: "FlashAttention: Fast and Memory-Efficient Exact Attention", url: "#" },
-        { type: "Video", title: "CUDA Programming for Deep Learning", url: "#" }
-      ]
-    },
-    {
-      title: "Distributed Training with PyTorch FSDP",
-      description: "Implementing Fully Sharded Data Parallelism for 10B+ parameter models.",
-      status: "in-progress",
-      duration: "5 days",
-      resources: [
-        { type: "Docs", title: "PyTorch FSDP Tutorial", url: "#" },
-        { type: "Repo", title: "Scale-AI Open Source Implementation", url: "#" }
-      ]
-    },
-    {
-      title: "Vector DB Architecture (RAG)",
-      description: "Building high-performance retrieval systems using Pinecone and Weaviate.",
-      status: "pending",
-      duration: "4 days",
-      resources: [
-        { type: "Course", title: "Advanced RAG Pipelines", url: "#" }
-      ]
-    }
-  ]
-};
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 export default function RoadmapsPage() {
-  const [roadmap, setRoadmap] = useState(MOCK_ROADMAP);
+  const [loading, setLoading] = useState(false);
+  const [roadmap, setRoadmap] = useState<any>(null);
+  const [showForm, setShowForm] = useState(true);
+  const [formData, setFormData] = useState({
+    role: "Senior AI Engineer",
+    company: "Anthropic",
+    currentSkills: "React, TypeScript, basic Python"
+  });
+
+  const generateRoadmap = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/roadmaps/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setRoadmap(data);
+      setShowForm(false);
+      toast.success("Tactical Roadmap Generated!");
+    } catch (err: any) {
+      toast.error("Failed to generate roadmap: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (showForm && !roadmap) {
+    return (
+      <div className="min-h-[80vh] flex flex-col items-center justify-center py-20 px-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-xl space-y-10"
+        >
+          <div className="text-center space-y-4">
+            <div className="w-20 h-20 rounded-3xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center mx-auto mb-6">
+              <Rocket className="w-10 h-10 text-blue-500" />
+            </div>
+            <h1 className="text-4xl md:text-5xl font-black text-white italic tracking-tighter uppercase leading-none">
+              INITIALIZE <span className="text-blue-500">MISSION.</span>
+            </h1>
+            <p className="text-slate-500 font-medium max-w-md mx-auto">
+              Define your target destination. Our AI will architect a hyper-fast tactical bridge between your current DNA and your dream role.
+            </p>
+          </div>
+
+          <Card className="glass border-white/5 p-8 space-y-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Target Role</Label>
+                <Input 
+                  value={formData.role}
+                  onChange={(e) => setFormData({...formData, role: e.target.value})}
+                  placeholder="e.g. Staff Engineer"
+                  className="glass border-white/10 text-white font-bold"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Target Company</Label>
+                <Input 
+                  value={formData.company}
+                  onChange={(e) => setFormData({...formData, company: e.target.value})}
+                  placeholder="e.g. Tesla"
+                  className="glass border-white/10 text-white font-bold"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Current Primary Skills</Label>
+              <textarea
+                value={formData.currentSkills}
+                onChange={(e) => setFormData({...formData, currentSkills: e.target.value})}
+                placeholder="List your core tech stack..."
+                className="w-full h-24 bg-slate-950/50 border border-white/10 rounded-xl p-4 text-white text-sm font-medium focus:outline-none focus:border-blue-500/50 transition-all resize-none"
+              />
+            </div>
+            <Button 
+              onClick={generateRoadmap}
+              disabled={loading}
+              className="w-full h-14 bg-blue-600 hover:bg-blue-500 text-white gap-3 text-lg font-black italic shadow-xl shadow-blue-500/20"
+            >
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
+              {loading ? "ARCHITECTING..." : "GENERATE MISSION"}
+            </Button>
+          </Card>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-12 pb-20">
@@ -61,15 +119,23 @@ export default function RoadmapsPage() {
          
          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
             <div className="space-y-6">
-               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
-                  <Sparkles className="w-3 h-3 text-blue-400" />
-                  <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest italic">AI Generated Path</span>
+               <div className="flex items-center gap-4">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
+                    <Sparkles className="w-3 h-3 text-blue-400" />
+                    <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest italic">AI Generated Path</span>
+                  </div>
+                  <button 
+                    onClick={() => setShowForm(true)}
+                    className="text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-widest flex items-center gap-2 transition-colors"
+                  >
+                    <Plus className="w-3 h-3" /> New Mission
+                  </button>
                </div>
                <h1 className="text-4xl md:text-6xl font-black text-white italic tracking-tighter uppercase leading-none">
                   MISSION: <span className="text-blue-500">{roadmap.company.toUpperCase()}</span>
                </h1>
                <p className="text-slate-400 text-lg font-medium max-w-xl">
-                  We've identified 3 critical skill gaps between your current DNA and the <span className="text-white font-bold">{roadmap.role}</span> role. This is your hyper-fast tactical roadmap.
+                  Tactical roadmap for the <span className="text-white font-bold">{roadmap.role}</span> role.
                </p>
                <div className="flex items-center gap-4 pt-4">
                   <div className="flex -space-x-2">
@@ -94,10 +160,6 @@ export default function RoadmapsPage() {
                      <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-1">Ready</span>
                   </div>
                </div>
-               <div className="space-y-1">
-                  <h4 className="text-sm font-black text-white uppercase italic">Phase 1: Foundations</h4>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">2 of 6 tasks complete</p>
-               </div>
                <Button className="w-full bg-blue-600 hover:bg-blue-500 h-12 rounded-xl text-[10px] font-black uppercase tracking-widest gap-2">
                   Resume Mission
                   <ArrowRight className="w-4 h-4" />
@@ -107,11 +169,10 @@ export default function RoadmapsPage() {
       </div>
 
       {/* ROADMAP STEPS */}
-      <div className="max-w-4xl mx-auto space-y-8 relative">
-         {/* Vertical Connector Line */}
-         <div className="absolute left-6 top-8 bottom-8 w-0.5 bg-gradient-to-b from-blue-500 via-blue-500/20 to-transparent -z-10" />
+      <div className="max-w-4xl mx-auto space-y-8 relative px-4 md:px-0">
+         <div className="absolute left-6 md:left-6 top-8 bottom-8 w-0.5 bg-gradient-to-b from-blue-500 via-blue-500/20 to-transparent -z-10" />
 
-         {roadmap.steps.map((step, idx) => (
+         {roadmap.steps.map((step: any, idx: number) => (
             <motion.div 
                key={idx}
                initial={{ opacity: 0, x: -20 }}
@@ -119,10 +180,9 @@ export default function RoadmapsPage() {
                viewport={{ once: true }}
                transition={{ delay: idx * 0.1 }}
             >
-               <Card className={`glass p-8 ml-12 relative group transition-all duration-500 ${
+               <Card className={`glass p-6 md:p-8 ml-12 relative group transition-all duration-500 ${
                   step.status === 'in-progress' ? 'border-blue-500/50 bg-blue-500/5' : 'border-white/5'
                }`}>
-                  {/* Step Marker */}
                   <div className={`absolute -left-[54px] top-8 w-11 h-11 rounded-xl border-4 border-slate-950 flex items-center justify-center z-10 transition-colors ${
                      step.status === 'completed' ? 'bg-green-500 text-white' : 
                      step.status === 'in-progress' ? 'bg-blue-600 text-white animate-pulse' : 
@@ -131,7 +191,7 @@ export default function RoadmapsPage() {
                      {step.status === 'completed' ? <CheckCircle2 className="w-6 h-6" /> : <Zap className="w-6 h-6" />}
                   </div>
 
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
                      <div className="space-y-2 flex-1">
                         <div className="flex items-center gap-3">
                            <h3 className={`text-xl font-black italic uppercase tracking-tight ${
@@ -144,7 +204,7 @@ export default function RoadmapsPage() {
 
                      <div className="flex flex-col gap-3 min-w-[200px]">
                         <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1">Curated DNA Resources</h4>
-                        {step.resources.map((res, i) => (
+                        {step.resources.map((res: any, i: number) => (
                            <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-blue-500/30 transition-all cursor-pointer group/res">
                               <div className="flex items-center gap-3">
                                  {res.type === 'Video' ? <PlayCircle className="w-4 h-4 text-red-400" /> : <FileText className="w-4 h-4 text-blue-400" />}
@@ -158,19 +218,6 @@ export default function RoadmapsPage() {
                </Card>
             </motion.div>
          ))}
-
-         {/* FINAL MILESTONE */}
-         <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            className="ml-12 p-8 rounded-[32px] bg-gradient-to-br from-blue-600/20 to-violet-600/20 border border-blue-500/30 flex flex-col items-center text-center gap-4"
-          >
-            <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center shadow-2xl shadow-blue-500/50">
-               <Trophy className="w-8 h-8 text-white" />
-            </div>
-            <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter">Hired at Anthropic</h3>
-            <p className="text-slate-400 text-sm font-medium">Complete all tactical steps to unlock your direct referral link.</p>
-         </motion.div>
       </div>
     </div>
   );
