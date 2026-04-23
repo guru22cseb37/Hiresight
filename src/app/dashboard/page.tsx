@@ -17,6 +17,7 @@ import {
 import Link from "next/link";
 import { Badge } from "../../components/ui/badge";
 import { cn } from "@/lib/utils";
+import { AutonomousAgentHub } from "@/components/dashboard/AutonomousAgentHub";
 
 const chartData = [
   { name: "Mon", score: 65 },
@@ -120,6 +121,9 @@ export default function DashboardPage() {
           color="amber"
         />
       </div>
+
+      {/* AUTONOMOUS AGENT HUB */}
+      <AutonomousAgentHub />
 
       {/* INTELLIGENCE SECTION */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

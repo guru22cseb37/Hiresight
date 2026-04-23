@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, FileSearch, ClipboardList, Briefcase, 
   FileCode2, Mic, Linkedin, Settings, LogOut, Menu, X,
-  PlusCircle, Users, BarChart3, Send, SearchCode, Globe
+  PlusCircle, Users, BarChart3, Send, SearchCode, Globe, Zap
 } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/button";
@@ -33,12 +33,14 @@ export function Sidebar({ role }: SidebarProps) {
 
   const seekerLinks: NavLink[] = [
     { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Matchmaker", href: "/dashboard/discovery", icon: Zap, badge: "HOT" },
     { name: "Analyze", href: "/dashboard/analyze", icon: FileSearch },
     { name: "Tracker", href: "/dashboard/applications", icon: ClipboardList },
     { name: "Market Intel", href: "/dashboard/market", icon: Globe, badge: "LIVE" },
     { name: "Company Check", href: "/dashboard/company", icon: SearchCode, badge: "NEW" },
     { name: "Job Board", href: "/dashboard/jobs", icon: Briefcase, badge: "LIVE" },
     { name: "Networking Pulse", href: "/dashboard/outreach", icon: Send, badge: "AI" },
+    { name: "Mission Roadmaps", href: "/dashboard/roadmaps", icon: Rocket, badge: "AI" },
     { name: "Skill Gap Radar", href: "/dashboard/skills", icon: BarChart3 },
     { name: "Negotiator", href: "/dashboard/negotiator", icon: Users },
     { name: "Resumes", href: "/dashboard/resumes", icon: FileCode2 },
@@ -50,6 +52,7 @@ export function Sidebar({ role }: SidebarProps) {
 
   const recruiterLinks: NavLink[] = [
     { name: "Overview", href: "/recruiter", icon: LayoutDashboard },
+    { name: "Matchmaker", href: "/recruiter/discovery", icon: Zap, badge: "HOT" },
     { name: "Interview Intelligence", href: "/recruiter/interviews", icon: Mic, badge: "AI" },
     { name: "Sourcing HUD", href: "/recruiter/sourcing", icon: SearchCode, badge: "PRO" },
     { name: "Rapid Screen", href: "/recruiter/rapid-screen", icon: Users, badge: "FAST" },

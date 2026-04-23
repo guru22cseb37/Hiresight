@@ -4,14 +4,15 @@ const OPENROUTER_KEYS = [
   process.env.OPENROUTER_KEY_1,
   process.env.OPENROUTER_KEY_2,
   process.env.OPENROUTER_KEY_3,
+  process.env.OPENROUTER_KEY_4,
 ].filter(Boolean) as string[];
 
 const MODELS = [
+  "inclusion/ling-2.6-flash", // New primary model
   "google/gemini-2.0-flash-001",
   "openai/gpt-4o-mini",
-  "perplexity/llama-3.1-sonar-small-128k-online", // For real-time search
+  "perplexity/llama-3.1-sonar-small-128k-online",
   "z-ai/glm-4.5-air:free",
-  "openai/gpt-oss-120b:free",
 ];
 
 export async function callAI({
