@@ -10,37 +10,30 @@ export async function parsePdfAction(formData: FormData) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Using a more robust loading strategy for the Mehmet Kozan fork
-    let parseFunc: any;
-    
+    // Attempt to load pdf-parse robustly
+    let pdfParse: any;
     try {
-      // 1. Try modern dynamic import
-      const mod = await import("pdf-parse/node");
-      parseFunc = (mod as any).default || mod;
+      // Standard CommonJS require
+      pdfParse = require("pdf-parse");
     } catch (e) {
       try {
-        // 2. Try standard require
-        const mod = require("pdf-parse/node");
-        parseFunc = (mod as any).default || mod;
+        // Fallback for some environments
+        const mod = await import("pdf-parse");
+        pdfParse = mod.default || mod;
       } catch (e2) {
-        // 3. Last resort: main entry
-        const mod = require("pdf-parse");
-        parseFunc = (mod as any).default || mod;
+        console.error("Critical: Could not load pdf-parse library", e2);
+        throw new Error("PDF parsing engine not found.");
       }
     }
 
-    // Safety check: ensure we actually have a function
-    if (typeof parseFunc !== 'function') {
-      // In some versions of this fork, it's a named export
-      if (parseFunc && typeof parseFunc.pdf === 'function') parseFunc = parseFunc.pdf;
-      else if (parseFunc && typeof parseFunc.parse === 'function') parseFunc = parseFunc.parse;
-      else {
-        console.error("PDF Library Object Structure:", JSON.stringify(Object.keys(parseFunc || {})));
-        throw new Error("Could not initialize PDF parser. Please try again.");
-      }
+    // Ensure we have a function
+    let parse = typeof pdfParse === "function" ? pdfParse : (pdfParse?.default || pdfParse?.parse);
+    
+    if (typeof parse !== "function") {
+      throw new Error("Could not initialize PDF parser structure.");
     }
 
-    const data = await parseFunc(buffer);
+    const data = await parse(buffer);
     
     return { text: data?.text || "" };
   } catch (error: any) {
