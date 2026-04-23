@@ -14,7 +14,19 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { SkillTree3D } from "@/components/3d/SkillTree3D";
+import dynamic from "next/dynamic";
+
+const SkillTree3D = dynamic(() => import("@/components/3d/SkillTree3D").then(mod => mod.SkillTree3D), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full min-h-[500px] flex items-center justify-center bg-black rounded-[32px] border border-violet-500/10">
+      <div className="flex flex-col items-center gap-4">
+        <Loader2 className="w-10 h-10 text-violet-500 animate-spin" />
+        <p className="text-slate-500 font-black uppercase tracking-widest animate-pulse">Initializing 3D Neural Network...</p>
+      </div>
+    </div>
+  )
+});
 
 export default function SkillGapPage() {
   const [loading, setLoading] = useState(false);
