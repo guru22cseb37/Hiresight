@@ -23,8 +23,8 @@ export async function parsePdfAction(formData: FormData) {
     } catch (e) {
       try {
         const mod = await import("pdf-parse");
-        const pdf = mod.default || mod;
-        parse = typeof pdf === "function" ? pdf : (pdf.default || pdf.parse || pdf);
+        const pdf = (mod as any).default || mod;
+        parse = typeof pdf === "function" ? pdf : ((pdf as any).default || (pdf as any).parse || pdf);
       } catch (e2) {
         console.error("Critical: Could not load pdf-parse library", e2);
       }
