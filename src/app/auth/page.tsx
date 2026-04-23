@@ -19,6 +19,7 @@ function AuthForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [isSignUp, setIsSignUp] = useState(searchParams.get("signup") === "true");
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,7 +30,14 @@ function AuthForm() {
     setLoading(true);
 
     try {
-      if (isSignUp) {
+      if (isForgotPassword) {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/auth/update-password`,
+        });
+        if (error) throw error;
+        toast.success("Password reset link sent to your email!");
+        setIsForgotPassword(false);
+      } else if (isSignUp) {
         const { error } = await supabase.auth.signUp({ 
           email, 
           password,
@@ -39,7 +47,8 @@ function AuthForm() {
           }
         });
         if (error) throw error;
-        toast.success("Check your email to confirm signup!");
+        toast.success("Account created successfully!");
+        router.push("/onboarding");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -83,26 +92,34 @@ function AuthForm() {
         <Card className="glass border-white/5 p-8 shadow-2xl">
           <div className="text-center mb-8">
             <div className="inline-flex w-12 h-12 rounded-xl bg-blue-600 items-center justify-center font-bold text-white mb-4">H</div>
-            <h1 className="text-2xl font-bold text-white italic">{isSignUp ? "Join HireSight" : "Welcome Back"}</h1>
+            <h1 className="text-2xl font-bold text-white italic">
+              {isForgotPassword ? "Reset Password" : (isSignUp ? "Join HireSight" : "Welcome Back")}
+            </h1>
             <p className="text-slate-400 text-sm mt-2">
-              {isSignUp ? "Start your journey to a better career today." : "Log in to access your intelligence dashboard."}
+              {isForgotPassword 
+                ? "Enter your email to receive a recovery link." 
+                : (isSignUp ? "Start your journey to a better career today." : "Log in to access your intelligence dashboard.")}
             </p>
           </div>
 
           <div className="space-y-4">
-            <Button 
-              variant="outline" 
-              className="w-full h-12 glass border-white/10 text-white gap-3 hover:bg-white/5 active:scale-95 transition-all"
-              onClick={handleGoogleAuth}
-            >
-              <Chrome className="w-5 h-5" />
-              Continue with Google
-            </Button>
+            {!isForgotPassword && (
+              <>
+                <Button 
+                  variant="outline" 
+                  className="w-full h-12 glass border-white/10 text-white gap-3 hover:bg-white/5 active:scale-95 transition-all"
+                  onClick={handleGoogleAuth}
+                >
+                  <Chrome className="w-5 h-5" />
+                  Continue with Google
+                </Button>
 
-            <div className="relative py-4">
-              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/5"></div></div>
-              <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-slate-500">Or email</span></div>
-            </div>
+                <div className="relative py-4">
+                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/5"></div></div>
+                  <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-slate-500">Or email</span></div>
+                </div>
+              </>
+            )}
 
             <form onSubmit={handleEmailAuth} className="space-y-4">
               <div className="space-y-2">
@@ -121,23 +138,34 @@ function AuthForm() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-slate-300">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 w-5 h-5 text-slate-500" />
-                  <Input 
-                    id="password" 
-                    type="password" 
-                    placeholder="••••••••" 
-                    className="pl-10 h-12 glass border-white/10"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
+              {!isForgotPassword && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password" className="text-slate-300">Password</Label>
+                    <button 
+                      type="button"
+                      onClick={() => setIsForgotPassword(true)}
+                      className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                    >
+                      Forgot?
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 w-5 h-5 text-slate-500" />
+                    <Input 
+                      id="password" 
+                      type="password" 
+                      placeholder="••••••••" 
+                      className="pl-10 h-12 glass border-white/10"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required={!isForgotPassword}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {isSignUp && (
+              {isSignUp && !isForgotPassword && (
                 <div className="space-y-3 pt-2">
                   <Label className="text-slate-300">I am a...</Label>
                   <Tabs 
@@ -148,14 +176,14 @@ function AuthForm() {
                     <TabsList className="grid w-full grid-cols-2 h-12 bg-white/5 border border-white/10 p-1">
                       <TabsTrigger 
                         value="job_seeker" 
-                        className="data-active:bg-blue-600 data-active:text-white gap-2 transition-all"
+                        className="data-[state=active]:bg-blue-600 data-[state=active]:text-white gap-2 transition-all"
                       >
                         <User className="w-4 h-4" />
                         Job Seeker
                       </TabsTrigger>
                       <TabsTrigger 
                         value="recruiter" 
-                        className="data-active:bg-violet-600 data-active:text-white gap-2 transition-all"
+                        className="data-[state=active]:bg-violet-600 data-[state=active]:text-white gap-2 transition-all"
                       >
                         <Building2 className="w-4 h-4" />
                         Recruiter
@@ -170,19 +198,31 @@ function AuthForm() {
                 className="w-full h-12 bg-blue-600 hover:bg-blue-500 text-white mt-4"
                 disabled={loading}
               >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (isSignUp ? "Sign Up" : "Log In")}
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (isForgotPassword ? "Send Recovery Link" : (isSignUp ? "Sign Up" : "Log In"))}
               </Button>
+
+              {isForgotPassword && (
+                <button 
+                  type="button"
+                  onClick={() => setIsForgotPassword(false)}
+                  className="w-full text-center text-sm text-slate-400 hover:text-white transition-colors"
+                >
+                  Back to Log In
+                </button>
+              )}
             </form>
           </div>
 
-          <div className="mt-8 text-center">
-            <button 
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-sm text-slate-400 hover:text-blue-400 transition-colors"
-            >
-              {isSignUp ? "Already have an account? Log in" : "Don't have an account? Sign up"}
-            </button>
-          </div>
+          {!isForgotPassword && (
+            <div className="mt-8 text-center">
+              <button 
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-sm text-slate-400 hover:text-blue-400 transition-colors"
+              >
+                {isSignUp ? "Already have an account? Log in" : "Don't have an account? Sign up"}
+              </button>
+            </div>
+          )}
         </Card>
       </motion.div>
     </div>
