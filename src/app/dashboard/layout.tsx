@@ -1,6 +1,10 @@
 "use client";
 
 import { Sidebar } from "@/components/layout/Sidebar";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import { Loader2 } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
 
@@ -9,6 +13,45 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function checkRole() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push("/auth");
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from("users")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+      if (!profile?.role) {
+        router.push("/onboarding");
+      } else if (profile.role !== "job_seeker") {
+        router.push("/recruiter");
+      } else {
+        setLoading(false);
+      }
+    }
+    checkRole();
+  }, [router]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />
+          <p className="text-slate-500 font-medium animate-pulse">Initializing Dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen bg-background overflow-hidden">
       <Sidebar role="job_seeker" />

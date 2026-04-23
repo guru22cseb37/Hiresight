@@ -9,8 +9,10 @@ import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
 import { Chrome, Mail, Lock, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
+import { supabase, Role } from "@/lib/supabase";
 import { toast } from "sonner";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { User, Building2 } from "lucide-react";
 
 // Inner component that uses useSearchParams - must be wrapped in Suspense
 function AuthForm() {
@@ -20,6 +22,7 @@ function AuthForm() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState<Role>("job_seeker");
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +33,10 @@ function AuthForm() {
         const { error } = await supabase.auth.signUp({ 
           email, 
           password,
-          options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
+          options: { 
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            data: { role }
+          }
         });
         if (error) throw error;
         toast.success("Check your email to confirm signup!");
@@ -130,6 +136,34 @@ function AuthForm() {
                   />
                 </div>
               </div>
+
+              {isSignUp && (
+                <div className="space-y-3 pt-2">
+                  <Label className="text-slate-300">I am a...</Label>
+                  <Tabs 
+                    value={role} 
+                    onValueChange={(v) => setRole(v as Role)} 
+                    className="w-full"
+                  >
+                    <TabsList className="grid w-full grid-cols-2 h-12 bg-white/5 border border-white/10 p-1">
+                      <TabsTrigger 
+                        value="job_seeker" 
+                        className="data-active:bg-blue-600 data-active:text-white gap-2 transition-all"
+                      >
+                        <User className="w-4 h-4" />
+                        Job Seeker
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="recruiter" 
+                        className="data-active:bg-violet-600 data-active:text-white gap-2 transition-all"
+                      >
+                        <Building2 className="w-4 h-4" />
+                        Recruiter
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
+              )}
 
               <Button 
                 type="submit" 

@@ -22,8 +22,23 @@ export default function AuthCallback() {
           .eq("id", data.session.user.id)
           .single();
 
-        if (profile?.role) {
-          router.push(profile.role === "recruiter" ? "/recruiter" : "/dashboard");
+        let userRole = profile?.role;
+
+        // If no profile exists, check for role in metadata (from signup)
+        if (!userRole && data.session.user.user_metadata?.role) {
+          userRole = data.session.user.user_metadata.role;
+          
+          // Create the profile record immediately to ensure smooth transition
+          await supabase.from("users").upsert({
+            id: data.session.user.id,
+            email: data.session.user.email,
+            role: userRole,
+            updated_at: new Date().toISOString()
+          });
+        }
+
+        if (userRole) {
+          router.push(userRole === "recruiter" ? "/recruiter" : "/dashboard");
         } else {
           router.push("/onboarding");
         }
