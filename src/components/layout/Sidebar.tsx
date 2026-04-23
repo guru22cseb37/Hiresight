@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, FileSearch, ClipboardList, Briefcase, 
   FileCode2, Mic, Linkedin, Settings, LogOut, Menu, X,
-  PlusCircle, Users, BarChart3, Send, SearchCode, Globe, Zap
+  PlusCircle, Users, BarChart3, Send, SearchCode, Globe, Zap, Rocket
 } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/button";
