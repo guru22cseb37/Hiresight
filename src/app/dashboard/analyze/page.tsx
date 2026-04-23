@@ -80,26 +80,51 @@ export default function AnalyzePage() {
     }
 
     setIsParsing(true);
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const promise = parsePdfAction(formData);
-    toast.promise(promise, {
-      loading: "Extracting intelligence from PDF...",
-      success: (res: any) => {
-        if (res.error) throw new Error(res.error);
-        setResumeText(res.text);
-        setActiveTab("paste"); // Switch back to see the text
-        return "Resume parsed successfully!";
-      },
-      error: (err) => err.message || "Failed to parse PDF"
-    });
+    const toastId = toast.loading("AI is scanning your PDF...");
 
     try {
-      await promise;
-    } finally {
+      // DEEP RECTIFICATION: Client-side parsing using a robust approach
+      const reader = new FileReader();
+      
+      reader.onload = async (event) => {
+        try {
+          const typedarray = new Uint8Array(event.target?.result as ArrayBuffer);
+          
+          // We use a dynamic import of the PDF.js library to ensure it's only loaded when needed
+          // and works perfectly in the browser environment.
+          const pdfjs = await import("pdfjs-dist");
+          pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+          
+          const pdf = await pdfjs.getDocument(typedarray).promise;
+          let fullText = "";
+          
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            const pageText = textContent.items.map((item: any) => item.str).join(" ");
+            fullText += pageText + "\n";
+          }
+          
+          if (!fullText.trim()) {
+            throw new Error("Could not extract text. The PDF might be an image/scan.");
+          }
+
+          setResumeText(fullText);
+          setActiveTab("paste");
+          toast.success("Intelligence extracted successfully!", { id: toastId });
+        } catch (err: any) {
+          console.error("Client-side PDF Error:", err);
+          toast.error("Failed to parse PDF. Try pasting the text manually.", { id: toastId });
+        } finally {
+          setIsParsing(false);
+          if (fileInputRef.current) fileInputRef.current.value = "";
+        }
+      };
+
+      reader.readAsArrayBuffer(file);
+    } catch (err: any) {
+      toast.error("Critical parsing error. Please try again.", { id: toastId });
       setIsParsing(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
