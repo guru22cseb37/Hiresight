@@ -10,27 +10,29 @@ export async function parsePdfAction(formData: FormData) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Attempt to load pdf-parse robustly
-    let pdfParse: any;
+    // Greedy initialization for pdf-parse
+    let parse: any;
     try {
-      // Standard CommonJS require
-      pdfParse = require("pdf-parse");
+      const pdf = require("pdf-parse");
+      parse = typeof pdf === "function" ? pdf : (pdf.default || pdf.parse || pdf);
+      
+      // Some versions of the fork have a 'pdf' or 'parse' named export
+      if (typeof parse !== "function") {
+        parse = pdf.pdf || pdf.parse;
+      }
     } catch (e) {
       try {
-        // Fallback for some environments
         const mod = await import("pdf-parse");
-        pdfParse = mod.default || mod;
+        const pdf = mod.default || mod;
+        parse = typeof pdf === "function" ? pdf : (pdf.default || pdf.parse || pdf);
       } catch (e2) {
         console.error("Critical: Could not load pdf-parse library", e2);
-        throw new Error("PDF parsing engine not found.");
       }
     }
 
-    // Ensure we have a function
-    let parse = typeof pdfParse === "function" ? pdfParse : (pdfParse?.default || pdfParse?.parse);
-    
     if (typeof parse !== "function") {
-      throw new Error("Could not initialize PDF parser structure.");
+      console.error("PDF Parser structure check failed. Type of loaded object:", typeof parse);
+      throw new Error("Could not initialize PDF parser engine. Our engineers are notified.");
     }
 
     const data = await parse(buffer);
