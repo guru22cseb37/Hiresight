@@ -70,51 +70,63 @@ export default function AnalyzePage() {
     }, 1500);
   };
 
-  const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.type !== "application/pdf") {
-      toast.error("Please upload a valid PDF file.");
-      return;
-    }
-
+    const fileType = file.type;
+    const fileName = file.name.toLowerCase();
+    
     setIsParsing(true);
-    const toastId = toast.loading("AI is scanning your PDF...");
+    const toastId = toast.loading(`AI is scanning your ${fileName.split('.').pop()?.toUpperCase()}...`);
 
     try {
-      // DEEP RECTIFICATION: Client-side parsing using a robust approach
       const reader = new FileReader();
       
       reader.onload = async (event) => {
         try {
-          const typedarray = new Uint8Array(event.target?.result as ArrayBuffer);
+          const arrayBuffer = event.target?.result as ArrayBuffer;
+
+          // 1. HANDLE PDF
+          if (fileType === "application/pdf") {
+            const pdfjs = await import("pdfjs-dist");
+            pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+            
+            const pdf = await pdfjs.getDocument(new Uint8Array(arrayBuffer)).promise;
+            let fullText = "";
+            for (let i = 1; i <= pdf.numPages; i++) {
+              const page = await pdf.getPage(i);
+              const textContent = await page.getTextContent();
+              fullText += textContent.items.map((item: any) => item.str).join(" ") + "\n";
+            }
+            setResumeText(fullText);
+          } 
           
-          // We use a dynamic import of the PDF.js library to ensure it's only loaded when needed
-          // and works perfectly in the browser environment.
-          const pdfjs = await import("pdfjs-dist");
-          pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
-          
-          const pdf = await pdfjs.getDocument(typedarray).promise;
-          let fullText = "";
-          
-          for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const textContent = await page.getTextContent();
-            const pageText = textContent.items.map((item: any) => item.str).join(" ");
-            fullText += pageText + "\n";
-          }
-          
-          if (!fullText.trim()) {
-            throw new Error("Could not extract text. The PDF might be an image/scan.");
+          // 2. HANDLE WORD (DOCX)
+          else if (fileName.endsWith(".docx")) {
+            const mammoth = await import("mammoth");
+            const result = await mammoth.extractRawText({ arrayBuffer });
+            setResumeText(result.value);
           }
 
-          setResumeText(fullText);
+          // 3. HANDLE IMAGES (PNG, JPEG) - OCR
+          else if (fileType.startsWith("image/")) {
+            const { createWorker } = await import("tesseract.js");
+            const worker = await createWorker('eng');
+            const { data: { text } } = await worker.recognize(file);
+            await worker.terminate();
+            setResumeText(text);
+          }
+
+          else {
+            throw new Error("Unsupported file format.");
+          }
+
           setActiveTab("paste");
           toast.success("Intelligence extracted successfully!", { id: toastId });
         } catch (err: any) {
-          console.error("Client-side PDF Error:", err);
-          toast.error("Failed to parse PDF. Try pasting the text manually.", { id: toastId });
+          console.error("Parsing Error:", err);
+          toast.error(`Failed to parse ${fileName.split('.').pop()?.toUpperCase()}. Try pasting manually.`, { id: toastId });
         } finally {
           setIsParsing(false);
           if (fileInputRef.current) fileInputRef.current.value = "";
@@ -123,7 +135,7 @@ export default function AnalyzePage() {
 
       reader.readAsArrayBuffer(file);
     } catch (err: any) {
-      toast.error("Critical parsing error. Please try again.", { id: toastId });
+      toast.error("Critical parsing error.", { id: toastId });
       setIsParsing(false);
     }
   };
@@ -156,8 +168,8 @@ export default function AnalyzePage() {
               type="file" 
               ref={fileInputRef} 
               className="hidden" 
-              accept=".pdf" 
-              onChange={handlePdfUpload}
+              accept=".pdf,.docx,.png,.jpg,.jpeg" 
+              onChange={handleFileUpload}
             />
             <div className="flex gap-2 p-1 rounded-xl bg-slate-900 border border-white/10 w-fit">
               <Button 
@@ -176,7 +188,7 @@ export default function AnalyzePage() {
                 disabled={isParsing}
               >
                 {isParsing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
-                Upload PDF
+                Upload Resume
               </Button>
             </div>
             
