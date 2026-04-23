@@ -42,7 +42,6 @@ export async function POST(req: Request) {
     const result = await callAI({
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" },
-      model: "google/gemini-2.0-flash-001"
     });
 
     return NextResponse.json(JSON.parse(cleanJSON(result)));
