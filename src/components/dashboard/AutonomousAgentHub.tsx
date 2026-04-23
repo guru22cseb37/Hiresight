@@ -82,9 +82,9 @@ export function AutonomousAgentHub() {
              </div>
           </div>
 
-          <p className="text-slate-400 text-sm leading-relaxed font-medium bg-blue-500/5 p-4 rounded-xl border border-blue-500/10 italic">
-            "Agent is currently analyzing 142 new job postings from Y-Combinator. 3 matches identified with >90% compatibility. Commencing autonomous resume tailoring sequence."
-          </p>
+      <p className="text-slate-400 text-sm leading-relaxed font-medium bg-blue-500/5 p-4 rounded-xl border border-blue-500/10 italic">
+        "Agent is currently analyzing 142 new job postings from Y-Combinator. 3 matches identified with &gt;90% compatibility. Commencing autonomous resume tailoring sequence."
+      </p>
         </div>
 
         {/* Right Side: Task Queue */}
