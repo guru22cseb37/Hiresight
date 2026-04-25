@@ -97,9 +97,10 @@ export default function SkillGapPage() {
 
       {/* 3D Skill Network Visualization */}
       <div className="relative">
-        <Card className="glass border-violet-500/20 p-2 overflow-hidden h-[500px]">
+        <div className="border border-violet-500/20 p-0 overflow-hidden h-[500px] rounded-3xl" style={{ background: "#000" }}>
           <SkillTree3D data={results} onNodeClick={handleNodeClick} />
-        </Card>
+        </div>
+
 
         {/* Quest Overlay */}
         {questNode && (

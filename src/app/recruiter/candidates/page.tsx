@@ -39,17 +39,25 @@ export default function CandidatesPage() {
 
       if (error) throw error;
 
-      const realCandidates = (data || []).map(c => ({
-        id: c.id,
-        name: c.name || "Anonymous Candidate",
-        targetRole: "Applied Candidate",
-        status: c.stage === 'new' ? 'screening' : c.stage,
-        experience: "See Resume",
-        score: c.ai_score || 0,
-        location: "Remote",
-        tags: c.strengths || [],
-        isReal: true
-      }));
+      const realCandidates = (data || []).map(c => {
+        // Extract details from notes if available (e.g. "Applied for AI Developer at HIRESIGHT. Experience: Fresher (0-1 Years). Location: Remote.")
+        const notesStr = c.notes || "";
+        const expMatch = notesStr.match(/Experience: (.*?)\./);
+        const roleMatch = notesStr.match(/Applied for (.*?) at/);
+
+        return {
+          id: c.id,
+          name: c.name || "Anonymous Candidate",
+          targetRole: roleMatch ? roleMatch[1] : "Applied Candidate",
+          status: c.stage === 'new' ? 'screening' : c.stage,
+          experience: expMatch ? expMatch[1] : "See Resume",
+          score: c.ai_score || 0,
+          location: "Remote",
+          tags: c.strengths || [],
+          resumeUrl: c.resume_url,
+          isReal: true
+        };
+      });
 
       setCandidates([...realCandidates, ...MOCK_CANDIDATES]);
     } catch (error) {
@@ -189,7 +197,18 @@ function CandidateCard({ candidate, index }: any) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-slate-950 border-white/10">
               <DropdownMenuItem className="text-sm">View Full Profile</DropdownMenuItem>
-              <DropdownMenuItem className="text-sm">Download Resume</DropdownMenuItem>
+              <DropdownMenuItem 
+                className="text-sm"
+                onClick={() => {
+                  if (candidate.resumeUrl) {
+                    window.open(candidate.resumeUrl, "_blank");
+                  } else {
+                    toast.error("No resume attached for this candidate.");
+                  }
+                }}
+              >
+                Download Resume
+              </DropdownMenuItem>
               <DropdownMenuItem className="text-sm">Schedule Interview</DropdownMenuItem>
               <DropdownMenuItem className="text-sm text-red-400">Remove Candidate</DropdownMenuItem>
             </DropdownMenuContent>

@@ -1,10 +1,13 @@
 "use client";
 
-import React, { useRef, useMemo } from "react";
+import React, { useRef, useMemo, useEffect, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Sphere, Line, Text, Float } from "@react-three/drei";
 import * as THREE from "three";
 
+// ─────────────────────────────────────────────
+// Node component — individual skill sphere
+// ─────────────────────────────────────────────
 function Node({ position, label, color, unlocked, onClick, isMissing }: any) {
   const meshRef = useRef<THREE.Mesh>(null);
   
@@ -19,8 +22,8 @@ function Node({ position, label, color, unlocked, onClick, isMissing }: any) {
       <group 
         position={position} 
         onClick={onClick} 
-        onPointerOver={() => document.body.style.cursor = 'pointer'}
-        onPointerOut={() => document.body.style.cursor = 'auto'}
+        onPointerOver={() => { document.body.style.cursor = "pointer"; }}
+        onPointerOut={() => { document.body.style.cursor = "auto"; }}
       >
         <Sphere ref={meshRef} args={[unlocked ? 0.5 : 0.3, 32, 32]}>
           <meshStandardMaterial 
@@ -41,13 +44,14 @@ function Node({ position, label, color, unlocked, onClick, isMissing }: any) {
         )}
 
         <Text
-          position={[0, -0.8, 0]}
-          fontSize={0.25}
-          color={unlocked ? "white" : (isMissing ? "#FCA5A5" : "gray")}
+          position={[0, -0.85, 0]}
+          fontSize={0.22}
+          color={unlocked ? "white" : (isMissing ? "#FCA5A5" : "#888")}
           anchorX="center"
           anchorY="middle"
           outlineWidth={0.02}
           outlineColor="#000"
+          maxWidth={3}
         >
           {label}
         </Text>
@@ -56,119 +60,215 @@ function Node({ position, label, color, unlocked, onClick, isMissing }: any) {
   );
 }
 
-function Connections({ nodes, edges }: { nodes: any[], edges: any[][] }) {
-  const points = useMemo(() => {
-    const validEdges = edges.filter(edge => {
-      const start = nodes.find(n => n.id === edge[0]);
-      const end = nodes.find(n => n.id === edge[1]);
-      return start && end;
-    });
-
-    return validEdges.map(edge => {
-      const startNode = nodes.find(n => n.id === edge[0]);
-      const endNode = nodes.find(n => n.id === edge[1]);
-      return {
-        pts: [
-          new THREE.Vector3(startNode.position[0], startNode.position[1], startNode.position[2]),
-          new THREE.Vector3(endNode.position[0], endNode.position[1], endNode.position[2])
-        ],
-        color: startNode.status === "acquired" && endNode.status === "acquired" ? startNode.color : "#666",
-        opacity: startNode.status === "acquired" && endNode.status === "acquired" ? 0.6 : 0.3
-      };
-    });
+// ─────────────────────────────────────────────
+// Edges between nodes
+// ─────────────────────────────────────────────
+function Connections({ nodes, edges }: { nodes: any[]; edges: any[][] }) {
+  const connections = useMemo(() => {
+    return edges
+      .map((edge) => {
+        const start = nodes.find((n) => n.id === edge[0]);
+        const end = nodes.find((n) => n.id === edge[1]);
+        if (!start || !end) return null;
+        return {
+          pts: [
+            new THREE.Vector3(...start.position),
+            new THREE.Vector3(...end.position),
+          ],
+          color:
+            start.status === "acquired" && end.status === "acquired"
+              ? start.color
+              : "#444",
+          opacity:
+            start.status === "acquired" && end.status === "acquired" ? 0.6 : 0.25,
+        };
+      })
+      .filter(Boolean) as { pts: THREE.Vector3[]; color: string; opacity: number }[];
   }, [nodes, edges]);
 
   return (
     <>
-      {points.map((connection, i) => (
+      {connections.map((c, i) => (
         <Line
           key={i}
-          points={connection.pts}
-          color={connection.color}
+          points={c.pts}
+          color={c.color}
           lineWidth={1.5}
           transparent
-          opacity={connection.opacity}
+          opacity={c.opacity}
         />
       ))}
     </>
   );
 }
 
-export function SkillTree3D({ data, onNodeClick }: { data?: any, onNodeClick?: (node: any) => void }) {
-  // If no data, render a cool placeholder network
+// ─────────────────────────────────────────────
+// Demo placeholder network shown before sync
+// ─────────────────────────────────────────────
+const PLACEHOLDER_NODES = [
+  { id: "ml",  position: [ 2.5,  1.5,  0],   label: "Machine Learning",   color: "#3B82F6", status: "acquired" },
+  { id: "ds",  position: [-2.5,  1.5,  0],   label: "Data Structures",    color: "#10B981", status: "acquired" },
+  { id: "py",  position: [ 0.5,  0,    1],   label: "Python",             color: "#10B981", status: "acquired" },
+  { id: "js",  position: [ 2,   -1.5,  0],   label: "JavaScript",         color: "#F59E0B", status: "missing" },
+  { id: "dl",  position: [ 0,   -2,    0],   label: "Deep Learning",      color: "#EF4444", status: "missing" },
+  { id: "cc",  position: [ 3.5,  0,   -1],   label: "Cloud Computing",    color: "#EF4444", status: "missing" },
+  { id: "tm",  position: [-1.5, -1,    0],   label: "Team Management",    color: "#8B5CF6", status: "acquired" },
+];
+const PLACEHOLDER_EDGES = [
+  ["ml", "py"], ["ds", "py"], ["py", "dl"], ["ml", "dl"],
+  ["js", "cc"], ["tm", "js"], ["ml", "cc"],
+];
+
+// ─────────────────────────────────────────────
+// Main exported component
+// ─────────────────────────────────────────────
+export function SkillTree3D({
+  data,
+  onNodeClick,
+}: {
+  data?: any;
+  onNodeClick?: (node: any) => void;
+}) {
+  const [contextLost, setContextLost] = useState(false);
+
+  // Build nodes from data or fall back to placeholder
   const skillNodes = useMemo(() => {
     if (!data?.skillNodes) {
-      return [
-        { id: "core", position: [0, 0, 0], label: "Awaiting Sync...", color: "#3B82F6", status: "acquired" }
-      ];
+      return PLACEHOLDER_NODES.map((n) => ({
+        ...n,
+        unlocked: n.status === "acquired",
+        isMissing: n.status === "missing",
+      }));
     }
 
-    // Assign simple 3D coordinates based on index (golden spiral layout)
     const count = data.skillNodes.length;
     return data.skillNodes.map((n: any, i: number) => {
       const phi = Math.acos(-1 + (2 * i) / count);
       const theta = Math.sqrt(count * Math.PI) * phi;
-      const r = 3 + (Math.random() * 1.5);
-
-      const x = r * Math.cos(theta) * Math.sin(phi);
-      const y = r * Math.sin(theta) * Math.sin(phi);
-      const z = r * Math.cos(phi);
-
-      const isAcquired = n.status === "acquired";
+      const r = 3 + Math.random() * 1.5;
       return {
         ...n,
-        position: [x, y, z],
-        color: isAcquired ? "#10B981" : "#EF4444", // Green if acquired, Red if missing
-        unlocked: isAcquired,
-        isMissing: !isAcquired
+        position: [
+          r * Math.cos(theta) * Math.sin(phi),
+          r * Math.sin(theta) * Math.sin(phi),
+          r * Math.cos(phi),
+        ],
+        color: n.status === "acquired" ? "#10B981" : "#EF4444",
+        unlocked: n.status === "acquired",
+        isMissing: n.status !== "acquired",
       };
     });
   }, [data]);
 
-  const skillEdges = data?.skillEdges || [];
+  const skillEdges: any[][] = data?.skillEdges || PLACEHOLDER_EDGES;
 
   return (
-    <div className="w-full h-full relative min-h-[500px]">
-      <Canvas camera={{ position: [0, 0, 10], fov: 60 }} className="rounded-[32px] overflow-hidden">
-        <color attach="background" args={["#000"]} />
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 10, 10]} intensity={1} />
-        <pointLight position={[-10, -10, -10]} intensity={0.5} />
-        
-        <group position={[0, 0, 0]}>
-          <Connections nodes={skillNodes} edges={skillEdges} />
-          {skillNodes.map((node: any) => (
-            <Node 
-              key={node.id} 
-              {...node} 
-              onClick={(e: any) => {
-                e.stopPropagation();
-                if (onNodeClick) onNodeClick(node);
-              }}
-            />
-          ))}
-        </group>
+    <div
+      className="w-full h-full relative"
+      style={{
+        background: "#000",
+        borderRadius: "28px",
+        overflow: "hidden",
+        minHeight: "500px",
+      }}
+    >
+      {/* Hard black backdrop — prevents any white flash */}
+      <div
+        className="absolute inset-0"
+        style={{ background: "#000", zIndex: 0 }}
+      />
 
-        <OrbitControls 
-          enablePan={false}
-          minDistance={3}
-          maxDistance={15}
-          autoRotate
-          autoRotateSpeed={0.5}
-        />
-      </Canvas>
-      <div className="absolute top-6 left-6 pointer-events-none">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
+      {contextLost ? (
+        // Graceful fallback when WebGL context is unavailable
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-10">
+          <div className="w-16 h-16 rounded-2xl bg-violet-600/10 flex items-center justify-center">
+            <svg className="w-8 h-8 text-violet-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
+            </svg>
+          </div>
+          <p className="text-slate-400 text-sm font-medium">3D Neural Network</p>
+          <p className="text-slate-600 text-xs">WebGL context unavailable — try refreshing.</p>
+          <button
+            onClick={() => { setContextLost(false); }}
+            className="mt-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold rounded-xl transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      ) : (
+        <Canvas
+          camera={{ position: [0, 0, 10], fov: 60 }}
+          style={{
+            width: "100%",
+            height: "100%",
+            position: "absolute",
+            inset: 0,
+            background: "#000",
+            zIndex: 1,
+          }}
+          gl={{
+            antialias: true,
+            alpha: false,
+            powerPreference: "high-performance",
+            failIfMajorPerformanceCaveat: false,
+          }}
+          onCreated={({ gl }) => {
+            gl.setClearColor(new THREE.Color("#000000"), 1);
+            const canvas = gl.domElement;
+            canvas.addEventListener("webglcontextlost", () => setContextLost(true));
+          }}
+        >
+          <color attach="background" args={["#000000"]} />
+          <ambientLight intensity={0.5} />
+          <pointLight position={[10, 10, 10]} intensity={1} />
+          <pointLight position={[-10, -10, -10]} intensity={0.5} />
+          <pointLight position={[0, 0, 10]} intensity={0.3} color="#6366f1" />
+
+          <group position={[0, 0, 0]}>
+            <Connections nodes={skillNodes} edges={skillEdges} />
+            {skillNodes.map((node: any) => (
+              <Node
+                key={node.id}
+                {...node}
+                onClick={(e: any) => {
+                  e.stopPropagation();
+                  if (onNodeClick) onNodeClick(node);
+                }}
+              />
+            ))}
+          </group>
+
+          <OrbitControls
+            enablePan={false}
+            minDistance={3}
+            maxDistance={18}
+            autoRotate
+            autoRotateSpeed={0.5}
+          />
+        </Canvas>
+      )}
+
+      {/* Status badge */}
+      <div className="absolute top-5 left-5 pointer-events-none z-20">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 border border-white/10 backdrop-blur-sm">
           <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
           <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">
-             {data ? "Dynamic Path Generated" : "3D Neural Network Standby"}
+            {data ? "Dynamic Path Generated" : "3D Neural Network Standby"}
           </span>
         </div>
       </div>
-      {data && (
-        <div className="absolute bottom-6 left-6 pointer-events-none flex flex-col gap-2">
-           <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-[#10B981]" /><span className="text-xs text-white">Acquired Skill</span></div>
-           <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-[#EF4444]" /><span className="text-xs text-white">Missing Skill (Click to Learn)</span></div>
+
+      {/* Legend */}
+      {(data || true) && (
+        <div className="absolute bottom-5 left-5 pointer-events-none z-20 flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-[#10B981]" />
+            <span className="text-xs text-white/70 font-medium">Acquired Skill</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-[#EF4444]" />
+            <span className="text-xs text-white/70 font-medium">Missing Skill (Click to Learn)</span>
+          </div>
         </div>
       )}
     </div>

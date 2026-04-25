@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
-import { Chrome, Mail, Lock, ArrowLeft, Loader2 } from "lucide-react";
+import { Chrome, Mail, Lock, ArrowLeft, Loader2, User as UserIcon } from "lucide-react";
 import Link from "next/link";
 import { supabase, Role } from "@/lib/supabase";
 import { toast } from "sonner";
@@ -23,6 +23,7 @@ function AuthForm() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [role, setRole] = useState<Role>("job_seeker");
 
   const handleEmailAuth = async (e: React.FormEvent) => {
@@ -43,7 +44,7 @@ function AuthForm() {
           password,
           options: { 
             emailRedirectTo: `${window.location.origin}/auth/callback`,
-            data: { role }
+            data: { role, full_name: fullName }
           }
         });
         if (error) throw error;
@@ -122,6 +123,23 @@ function AuthForm() {
             )}
 
             <form onSubmit={handleEmailAuth} className="space-y-4">
+              {isSignUp && !isForgotPassword && (
+                <div className="space-y-2">
+                  <Label htmlFor="fullName" className="text-slate-300">Full Name</Label>
+                  <div className="relative">
+                    <UserIcon className="absolute left-3 top-3 w-5 h-5 text-slate-500" />
+                    <Input 
+                      id="fullName" 
+                      type="text" 
+                      placeholder="John Doe" 
+                      className="pl-10 h-12 glass border-white/10"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      required={isSignUp}
+                    />
+                  </div>
+                </div>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-slate-300">Email Address</Label>
                 <div className="relative">
