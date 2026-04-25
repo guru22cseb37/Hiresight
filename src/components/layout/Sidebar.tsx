@@ -52,12 +52,13 @@ export function Sidebar({ role }: SidebarProps) {
 
   const recruiterLinks: NavLink[] = [
     { name: "Overview", href: "/recruiter", icon: LayoutDashboard },
+    { name: "Candidates", href: "/recruiter/candidates", icon: Users, badge: "CRM" },
+    { name: "Job Postings", href: "/recruiter/jobs", icon: Briefcase },
+    { name: "New Job", href: "/recruiter/jobs/new", icon: PlusCircle },
     { name: "Matchmaker", href: "/recruiter/discovery", icon: Zap, badge: "HOT" },
     { name: "Interview Intelligence", href: "/recruiter/interviews", icon: Mic, badge: "AI" },
     { name: "Sourcing HUD", href: "/recruiter/sourcing", icon: SearchCode, badge: "PRO" },
     { name: "Rapid Screen", href: "/recruiter/rapid-screen", icon: Users, badge: "FAST" },
-    { name: "Job Postings", href: "/recruiter/jobs", icon: Briefcase },
-    { name: "New Job", href: "/recruiter/jobs/new", icon: PlusCircle },
     { name: "Analytics", href: "/recruiter/analytics", icon: BarChart3 },
     { name: "Outreach", href: "/recruiter/outreach", icon: Send },
     { name: "Brand Builder", href: "/recruiter/brand", icon: Linkedin },
