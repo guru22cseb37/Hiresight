@@ -1,9 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { 
   User, Shield, Bell, CreditCard, 
   Settings as SettingsIcon, Save, 
-  MapPin, Briefcase, Mail, Power
+  MapPin, Briefcase, Mail, Power, Loader2
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,8 +12,51 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
 export default function SeekerSettingsPage() {
+  const [userData, setUserData] = useState({
+    name: "",
+    targetRole: "Software Engineer",
+    location: "Remote",
+    experience: "1",
+    email: ""
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setUserData(prev => ({
+            ...prev,
+            name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || "",
+            email: user.email || ""
+          }));
+        }
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const handleSave = () => {
+    toast.success("Settings saved successfully!");
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[50vh]">
+        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-5xl mx-auto space-y-10">
       <div className="flex flex-col gap-2">
@@ -48,22 +92,42 @@ export default function SeekerSettingsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
               <div className="space-y-2">
                 <Label className="text-slate-300">Full Name</Label>
-                <Input placeholder="Your name" className="glass border-white/10" defaultValue="Alex Johnson" />
+                <Input 
+                  placeholder="Your name" 
+                  className="glass border-white/10" 
+                  value={userData.name}
+                  onChange={(e) => setUserData({...userData, name: e.target.value})}
+                />
               </div>
               <div className="space-y-2">
                 <Label className="text-slate-300">Target Role</Label>
-                <Input placeholder="e.g. Senior Frontend Engineer" className="glass border-white/10" defaultValue="Senior Product Designer" />
+                <Input 
+                  placeholder="e.g. Senior Frontend Engineer" 
+                  className="glass border-white/10" 
+                  value={userData.targetRole}
+                  onChange={(e) => setUserData({...userData, targetRole: e.target.value})}
+                />
               </div>
               <div className="space-y-2">
                 <Label className="text-slate-300">Location</Label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-3 w-4 h-4 text-slate-500" />
-                  <Input placeholder="City, Country" className="pl-10 glass border-white/10" defaultValue="Remote / New York" />
+                  <Input 
+                    placeholder="City, Country" 
+                    className="pl-10 glass border-white/10" 
+                    value={userData.location}
+                    onChange={(e) => setUserData({...userData, location: e.target.value})}
+                  />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label className="text-slate-300">Years of Experience</Label>
-                <Input type="number" className="glass border-white/10" defaultValue="6" />
+                <Input 
+                  type="number" 
+                  className="glass border-white/10" 
+                  value={userData.experience}
+                  onChange={(e) => setUserData({...userData, experience: e.target.value})}
+                />
               </div>
               <div className="space-y-2 md:col-span-2">
                 <Label className="text-slate-300">Portfolio URL</Label>
@@ -100,8 +164,8 @@ export default function SeekerSettingsPage() {
           >
             <div className="grid grid-cols-1 gap-6 p-6">
               <div className="space-y-2 max-w-sm">
-                <Label className="text-slate-300">Current Password</Label>
-                <Input type="password" placeholder="••••••••" className="glass border-white/10" />
+                <Label className="text-slate-300">Registered Email</Label>
+                <Input type="email" disabled value={userData.email} className="glass border-white/10 opacity-50 cursor-not-allowed" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
                 <div className="space-y-2">
@@ -114,9 +178,9 @@ export default function SeekerSettingsPage() {
                 </div>
               </div>
               <div className="pt-4">
-                <Button variant="outline" className="border-red-500/20 text-red-500 hover:bg-red-500/5">
+                <Button variant="outline" className="border-red-500/20 text-red-500 hover:bg-red-500/5" onClick={async () => { await supabase.auth.signOut(); window.location.href="/auth"; }}>
                   <Power className="w-4 h-4 mr-2" />
-                  Sign Out of All Devices
+                  Sign Out
                 </Button>
               </div>
             </div>
@@ -139,7 +203,7 @@ export default function SeekerSettingsPage() {
         </TabsContent>
         
         <div className="flex justify-end pt-6 border-t border-white/5">
-          <Button className="bg-blue-600 hover:bg-blue-500 text-white gap-2 px-8">
+          <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-500 text-white gap-2 px-8">
             <Save className="w-4 h-4" />
             Save Changes
           </Button>
