@@ -36,23 +36,29 @@ export default function JobsManagementPage() {
       setLoading(true);
       const { data, error } = await supabase
         .from("job_postings")
-        .select("*")
+        .select(`
+          *,
+          candidates(id, ai_score)
+        `)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
 
       // Map real jobs to the UI structure and merge with mocks
-      const realJobs = (data || []).map(j => ({
-        id: j.id,
-        title: j.role,
-        location: j.location,
-        type: "Full-time", // Default
-        date: formatDistanceToNow(new Date(j.created_at)) + " ago",
-        status: j.status,
-        applicants: 0,
-        matches: 0,
-        isReal: true
-      }));
+      const realJobs = (data || []).map(j => {
+        const cands = j.candidates || [];
+        return {
+          id: j.id,
+          title: j.role,
+          location: j.location,
+          type: "Full-time", // Default
+          date: formatDistanceToNow(new Date(j.created_at)) + " ago",
+          status: j.status,
+          applicants: cands.length,
+          matches: cands.filter((c: any) => c.ai_score && c.ai_score >= 85).length,
+          isReal: true
+        };
+      });
 
       setJobs([...realJobs, ...MOCK_JOBS]);
     } catch (error) {
@@ -170,7 +176,12 @@ function JobCard({ job }: any) {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-slate-950 border-white/10">
                 <DropdownMenuItem className="text-xs">Edit Job Post</DropdownMenuItem>
-                <DropdownMenuItem className="text-xs">View Candidates</DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="text-xs"
+                  onClick={() => window.location.href = "/recruiter/candidates"}
+                >
+                  View Candidates
+                </DropdownMenuItem>
                 <DropdownMenuItem className="text-xs">Copy External Link</DropdownMenuItem>
                 <DropdownMenuItem className="text-xs text-amber-500">Close Posting</DropdownMenuItem>
                 <DropdownMenuItem className="text-xs text-red-400">Delete Permanently</DropdownMenuItem>

@@ -6,7 +6,7 @@ import {
   Users, Search, Filter, Mail, Phone, 
   Linkedin, Download, Star, MoreVertical,
   CheckCircle2, Clock, XCircle, SearchCode,
-  MapPin, Briefcase, FileText, Loader2
+  MapPin, Briefcase, FileText, Loader2, X
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -24,6 +24,7 @@ export default function CandidatesPage() {
   const [candidates, setCandidates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [viewingProfile, setViewingProfile] = useState<any>(null);
 
   useEffect(() => {
     fetchCandidates();
@@ -48,6 +49,7 @@ export default function CandidatesPage() {
         return {
           id: c.id,
           name: c.name || "Anonymous Candidate",
+          email: c.email || "No email",
           targetRole: roleMatch ? roleMatch[1] : "Applied Candidate",
           status: c.stage === 'new' ? 'screening' : c.stage,
           experience: expMatch ? expMatch[1] : "See Resume",
@@ -55,6 +57,7 @@ export default function CandidatesPage() {
           location: "Remote",
           tags: c.strengths || [],
           resumeUrl: c.resume_url,
+          notes: notesStr,
           isReal: true
         };
       });
@@ -154,15 +157,91 @@ export default function CandidatesPage() {
           </div>
         ) : (
           candidates.filter(c => c.name.toLowerCase().includes(search.toLowerCase())).map((candidate, i) => (
-            <CandidateCard key={candidate.id} candidate={candidate} index={i} />
+            <CandidateCard key={candidate.id} candidate={candidate} index={i} onViewProfile={() => setViewingProfile(candidate)} />
           ))
         )}
       </div>
+
+      {viewingProfile && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="w-full max-w-2xl max-h-[85vh] bg-slate-950 border border-white/10 rounded-3xl flex flex-col shadow-2xl relative overflow-hidden"
+          >
+            <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+              <div className="flex items-center gap-4">
+                 <div className="w-14 h-14 rounded-2xl bg-slate-900 border border-white/10 text-white flex items-center justify-center font-bold text-2xl shadow-xl overflow-hidden">
+                   {viewingProfile.avatar ? (
+                     <img src={viewingProfile.avatar} alt={viewingProfile.name} className="w-full h-full object-cover" />
+                   ) : viewingProfile.name[0]}
+                 </div>
+                 <div>
+                   <h3 className="text-2xl font-bold text-white italic">{viewingProfile.name}</h3>
+                   <p className="text-slate-400 font-medium text-xs uppercase tracking-widest mt-1">{viewingProfile.targetRole}</p>
+                 </div>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setViewingProfile(null)} className="rounded-full hover:bg-white/10 text-white">
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto flex-1 space-y-6">
+               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                 <div className="p-4 rounded-xl bg-white/5 border border-white/5">
+                   <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">ATS Match</div>
+                   <div className="text-lg font-bold text-blue-400">{viewingProfile.score}%</div>
+                 </div>
+                 <div className="p-4 rounded-xl bg-white/5 border border-white/5">
+                   <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Experience</div>
+                   <div className="text-lg font-bold text-white">{viewingProfile.experience}</div>
+                 </div>
+                 <div className="p-4 rounded-xl bg-white/5 border border-white/5">
+                   <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Location</div>
+                   <div className="text-lg font-bold text-white truncate">{viewingProfile.location}</div>
+                 </div>
+                 <div className="p-4 rounded-xl bg-white/5 border border-white/5">
+                   <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Status</div>
+                   <div className="text-lg font-bold text-white capitalize">{viewingProfile.status}</div>
+                 </div>
+               </div>
+
+               <div>
+                 <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Core Skills & Strengths</h4>
+                 <div className="flex flex-wrap gap-2">
+                   {(viewingProfile.tags || []).length > 0 ? viewingProfile.tags.map((tag: string) => (
+                     <Badge key={tag} className="bg-blue-500/10 text-blue-400 border-blue-500/20">{tag}</Badge>
+                   )) : <span className="text-sm text-slate-500">No skills explicitly listed.</span>}
+                 </div>
+               </div>
+
+               <div>
+                 <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Application Notes / Bio</h4>
+                 <div className="p-4 rounded-xl bg-slate-900 border border-white/5 text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">
+                   {viewingProfile.notes || "No additional notes provided by the candidate."}
+                 </div>
+               </div>
+            </div>
+
+            <div className="p-6 border-t border-white/5 bg-slate-900/50 flex justify-end gap-3">
+              <Button variant="ghost" onClick={() => setViewingProfile(null)} className="hover:bg-white/5 text-white">Close</Button>
+              <Button 
+                onClick={() => {
+                  if (viewingProfile.resumeUrl) window.open(viewingProfile.resumeUrl, "_blank");
+                  else toast.error("No resume attached.");
+                }} 
+                className="bg-blue-600 hover:bg-blue-500 text-white font-bold tracking-wider px-6 gap-2"
+              >
+                <Download className="w-4 h-4" /> Download Resume
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
 
-function CandidateCard({ candidate, index }: any) {
+function CandidateCard({ candidate, index, onViewProfile }: any) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -196,7 +275,7 @@ function CandidateCard({ candidate, index }: any) {
               <MoreVertical className="w-4 h-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-slate-950 border-white/10">
-              <DropdownMenuItem className="text-sm">View Full Profile</DropdownMenuItem>
+              <DropdownMenuItem className="text-sm" onClick={onViewProfile}>View Full Profile</DropdownMenuItem>
               <DropdownMenuItem 
                 className="text-sm"
                 onClick={() => {
