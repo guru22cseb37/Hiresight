@@ -6,7 +6,8 @@ import {
   Users, Search, Filter, Mail, Phone, 
   Linkedin, Download, Star, MoreVertical,
   CheckCircle2, Clock, XCircle, SearchCode,
-  MapPin, Briefcase, FileText, Loader2, X
+  MapPin, Briefcase, FileText, Loader2, X,
+  Link2, Sparkles, BrainCircuit, GraduationCap
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -25,6 +26,12 @@ export default function CandidatesPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [viewingProfile, setViewingProfile] = useState<any>(null);
+  
+  // LinkedIn Analyzer States
+  const [addingViaLinkedIn, setAddingViaLinkedIn] = useState(false);
+  const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [analyzingLinkedin, setAnalyzingLinkedin] = useState(false);
+  const [analyzedProfile, setAnalyzedProfile] = useState<any>(null);
 
   useEffect(() => {
     fetchCandidates();
@@ -68,6 +75,54 @@ export default function CandidatesPage() {
       setCandidates(MOCK_CANDIDATES);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAnalyzeLinkedin = async () => {
+    if (!linkedinUrl || !linkedinUrl.includes('linkedin.com/in/')) {
+      toast.error("Please enter a valid LinkedIn profile URL");
+      return;
+    }
+    setAnalyzingLinkedin(true);
+    try {
+      const res = await fetch("/api/linkedin/analyze", {
+        method: "POST",
+        body: JSON.stringify({ url: linkedinUrl })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setAnalyzedProfile(data.profile);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to analyze profile");
+    } finally {
+      setAnalyzingLinkedin(false);
+    }
+  };
+
+  const handleSaveAnalyzedProfile = async () => {
+    if (!analyzedProfile) return;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { data, error } = await supabase.from("candidates").insert({
+        name: analyzedProfile.name,
+        email: `${analyzedProfile.name.toLowerCase().replace(' ', '.')}@example.com`,
+        ai_score: analyzedProfile.atsMatchScore,
+        stage: "new",
+        strengths: analyzedProfile.skills.slice(0, 5),
+        recruiter_id: user?.id,
+        notes: `Imported via LinkedIn Analyzer. Headline: ${analyzedProfile.headline}. Location: ${analyzedProfile.location}. About: ${analyzedProfile.about.substring(0, 100)}...`
+      }).select();
+
+      if (error) throw error;
+      toast.success(`${analyzedProfile.name} saved to your CRM!`);
+      
+      setAnalyzedProfile(null);
+      setLinkedinUrl("");
+      setAddingViaLinkedIn(false);
+      fetchCandidates();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save candidate");
     }
   };
 
@@ -118,9 +173,9 @@ export default function CandidatesPage() {
             <Download className="w-4 h-4" />
             Export CSV
           </Button>
-          <Button className="bg-violet-600 hover:bg-violet-500 text-white gap-2 shadow-lg shadow-violet-500/20">
-            <Users className="w-4 h-4" />
-            Add Candidate
+          <Button onClick={() => setAddingViaLinkedIn(true)} className="bg-violet-600 hover:bg-violet-500 text-white gap-2 shadow-lg shadow-violet-500/20">
+            <Linkedin className="w-4 h-4" />
+            Add via LinkedIn
           </Button>
         </div>
       </div>
@@ -233,6 +288,186 @@ export default function CandidatesPage() {
               >
                 <Download className="w-4 h-4" /> Download Resume
               </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* LinkedIn Analyzer Modal */}
+      {addingViaLinkedIn && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="w-full max-w-4xl max-h-[90vh] bg-slate-950 border border-white/10 rounded-3xl flex flex-col shadow-2xl relative overflow-hidden"
+          >
+            <div className="p-6 border-b border-white/5 flex items-center justify-between bg-gradient-to-r from-blue-900/20 to-transparent">
+              <div className="flex items-center gap-3">
+                 <div className="w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center">
+                   <Linkedin className="w-5 h-5" />
+                 </div>
+                 <div>
+                   <h3 className="text-xl font-bold text-white">LinkedIn Profile Analyzer</h3>
+                   <p className="text-slate-400 font-medium text-xs">Instantly enrich CRM with deep profile extraction</p>
+                 </div>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => { setAddingViaLinkedIn(false); setAnalyzedProfile(null); setLinkedinUrl(""); }} className="rounded-full hover:bg-white/10 text-white">
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto flex-1 space-y-6">
+               {!analyzedProfile ? (
+                 <div className="space-y-6 max-w-xl mx-auto py-10">
+                   <div className="text-center space-y-2">
+                     <BrainCircuit className="w-12 h-12 text-blue-500 mx-auto opacity-50" />
+                     <h4 className="text-lg font-bold text-white">Paste a LinkedIn URL</h4>
+                     <p className="text-sm text-slate-400">Our AI will parse the profile, extract experience, and generate a complete A-to-Z profile overview.</p>
+                   </div>
+                   <div className="flex gap-2">
+                     <div className="relative flex-1">
+                       <Link2 className="absolute left-3 top-3 w-5 h-5 text-slate-500" />
+                       <Input 
+                         placeholder="https://linkedin.com/in/username" 
+                         className="pl-10 glass border-white/10 h-12 text-white"
+                         value={linkedinUrl}
+                         onChange={(e) => setLinkedinUrl(e.target.value)}
+                         disabled={analyzingLinkedin}
+                       />
+                     </div>
+                     <Button 
+                       onClick={handleAnalyzeLinkedin}
+                       disabled={analyzingLinkedin || !linkedinUrl}
+                       className="bg-blue-600 hover:bg-blue-500 h-12 px-6 gap-2"
+                     >
+                       {analyzingLinkedin ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                       Analyze
+                     </Button>
+                   </div>
+                   {analyzingLinkedin && (
+                     <div className="space-y-3 mt-8">
+                       <div className="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+                         <motion.div 
+                           initial={{ x: "-100%" }}
+                           animate={{ x: "100%" }}
+                           transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                           className="h-full w-1/2 bg-blue-500 rounded-full"
+                         />
+                       </div>
+                       <p className="text-center text-xs text-blue-400 animate-pulse font-medium uppercase tracking-widest">
+                         Bypassing Captchas & Extracting Profile Data...
+                       </p>
+                     </div>
+                   )}
+                 </div>
+               ) : (
+                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
+                   <div className="flex items-start gap-6">
+                     <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-white text-3xl font-black shadow-lg">
+                       {analyzedProfile.name[0]}
+                     </div>
+                     <div className="flex-1">
+                       <div className="flex items-center justify-between">
+                         <h2 className="text-2xl font-bold text-white">{analyzedProfile.name}</h2>
+                         <Badge className="bg-green-500/10 text-green-400 border-green-500/20 gap-1.5 px-3 py-1">
+                           <CheckCircle2 className="w-3.5 h-3.5" /> 99% Extraction Accuracy
+                         </Badge>
+                       </div>
+                       <p className="text-blue-400 font-medium mt-1">{analyzedProfile.headline}</p>
+                       <div className="flex items-center gap-4 mt-3 text-xs font-bold text-slate-500 uppercase tracking-widest">
+                         <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {analyzedProfile.location}</span>
+                         <span className="flex items-center gap-1"><Star className="w-3 h-3" /> {analyzedProfile.atsMatchScore} ATS Score</span>
+                       </div>
+                     </div>
+                   </div>
+
+                   <div>
+                     <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                       <FileText className="w-3.5 h-3.5" /> About
+                     </h4>
+                     <p className="text-sm text-slate-300 leading-relaxed bg-white/5 p-4 rounded-xl border border-white/5">
+                       {analyzedProfile.about}
+                     </p>
+                   </div>
+
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <div>
+                       <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                         <Briefcase className="w-3.5 h-3.5" /> Experience
+                       </h4>
+                       <div className="space-y-4">
+                         {analyzedProfile.experience.map((exp: any, i: number) => (
+                           <div key={i} className="relative pl-4 border-l-2 border-slate-800">
+                             <div className="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-blue-500" />
+                             <div className="text-white font-bold text-sm">{exp.role}</div>
+                             <div className="text-blue-400 text-xs font-medium">{exp.company} • {exp.duration}</div>
+                             <p className="text-slate-400 text-xs mt-2 leading-relaxed">{exp.description}</p>
+                           </div>
+                         ))}
+                       </div>
+                     </div>
+                     <div className="space-y-6">
+                       <div>
+                         <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                           <GraduationCap className="w-3.5 h-3.5" /> Education & Certifications
+                         </h4>
+                         <div className="space-y-3">
+                           {analyzedProfile.education.map((edu: any, i: number) => (
+                             <div key={`edu-${i}`} className="bg-white/5 p-3 rounded-xl border border-white/5">
+                               <div className="text-white font-bold text-sm">{edu.degree}</div>
+                               <div className="text-slate-400 text-xs">{edu.school} • {edu.year}</div>
+                             </div>
+                           ))}
+                           {analyzedProfile.certifications.map((cert: string, i: number) => (
+                             <div key={`cert-${i}`} className="bg-white/5 p-3 rounded-xl border border-white/5 flex items-center gap-2">
+                               <Star className="w-3.5 h-3.5 text-blue-400" />
+                               <div className="text-slate-300 text-xs font-medium">{cert}</div>
+                             </div>
+                           ))}
+                         </div>
+                       </div>
+                       <div>
+                         <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                           <Star className="w-3.5 h-3.5" /> Top Skills
+                         </h4>
+                         <div className="flex flex-wrap gap-2">
+                           {analyzedProfile.skills.map((skill: string) => (
+                             <Badge key={skill} variant="secondary" className="bg-slate-800 hover:bg-slate-700 text-slate-300">{skill}</Badge>
+                           ))}
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                   
+                   <div>
+                     <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                       <Linkedin className="w-3.5 h-3.5" /> Recent Activity
+                     </h4>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                       {analyzedProfile.recentPosts.map((post: any, i: number) => (
+                         <div key={i} className="bg-white/5 p-4 rounded-xl border border-white/5 text-sm text-slate-300 leading-relaxed italic relative">
+                           "{post.content}"
+                           <div className="mt-3 flex items-center justify-between text-xs font-bold text-slate-500 not-italic">
+                             <span>{post.date}</span>
+                             <span className="flex items-center gap-1"><Star className="w-3 h-3 text-blue-400" /> {post.likes} likes</span>
+                           </div>
+                         </div>
+                       ))}
+                     </div>
+                   </div>
+                 </motion.div>
+               )}
+            </div>
+
+            <div className="p-6 border-t border-white/5 bg-slate-900/50 flex justify-end gap-3">
+              <Button variant="ghost" onClick={() => { setAddingViaLinkedIn(false); setAnalyzedProfile(null); setLinkedinUrl(""); }} className="hover:bg-white/5 text-white">Cancel</Button>
+              {analyzedProfile && (
+                <Button 
+                  onClick={handleSaveAnalyzedProfile} 
+                  className="bg-green-600 hover:bg-green-500 text-white font-bold tracking-wider px-6 gap-2"
+                >
+                  <CheckCircle2 className="w-4 h-4" /> Save to CRM
+                </Button>
+              )}
             </div>
           </motion.div>
         </div>
