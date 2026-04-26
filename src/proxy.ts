@@ -5,8 +5,12 @@ import type { NextRequest } from 'next/server'
 export async function proxy(req: NextRequest) {
   const res = NextResponse.next()
   
-  // Use createServerClient as suggested by the Next.js 16 build error
-  const supabase = createServerClient({ req, res })
+  // Use createServerClient with required arguments (URL, Key, and Options)
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { req, res }
+  )
 
   const {
     data: { session },
