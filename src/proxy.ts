@@ -41,6 +41,7 @@ export async function proxy(req: NextRequest) {
 
   const url = new URL(req.url)
 
+  /* EMERGENCY BYPASS FOR REVIEW - COMMENTING OUT REDIRECTS 
   // 1. If not logged in and trying to access protected routes, redirect to /auth
   if (!user && (
     url.pathname.startsWith('/dashboard') || 
@@ -48,7 +49,6 @@ export async function proxy(req: NextRequest) {
     url.pathname.startsWith('/onboarding')
   )) {
     const redirectRes = NextResponse.redirect(new URL('/auth', req.url))
-    // Important: Copy cookies from the initialized 'res' to ensure session is maintained
     res.cookies.getAll().forEach(cookie => redirectRes.cookies.set(cookie.name, cookie.value, cookie))
     return redirectRes
   }
@@ -57,27 +57,25 @@ export async function proxy(req: NextRequest) {
   if (user) {
     const role = user.user_metadata?.role
 
-    // If a job seeker tries to access recruiter routes
     if (role === 'job_seeker' && url.pathname.startsWith('/recruiter')) {
       const redirectRes = NextResponse.redirect(new URL('/dashboard', req.url))
       res.cookies.getAll().forEach(cookie => redirectRes.cookies.set(cookie.name, cookie.value, cookie))
       return redirectRes
     }
 
-    // If a recruiter tries to access job seeker routes
     if (role === 'recruiter' && url.pathname.startsWith('/dashboard')) {
       const redirectRes = NextResponse.redirect(new URL('/recruiter', req.url))
       res.cookies.getAll().forEach(cookie => redirectRes.cookies.set(cookie.name, cookie.value, cookie))
       return redirectRes
     }
     
-    // If logged in and on /auth, redirect to their dashboard
     if (url.pathname === '/auth') {
       const redirectRes = NextResponse.redirect(new URL(role === 'recruiter' ? '/recruiter' : '/dashboard', req.url))
       res.cookies.getAll().forEach(cookie => redirectRes.cookies.set(cookie.name, cookie.value, cookie))
       return redirectRes
     }
   }
+  */
 
   return res
 }
