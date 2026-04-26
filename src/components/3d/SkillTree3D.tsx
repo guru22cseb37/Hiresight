@@ -2,7 +2,7 @@
 
 import React, { useRef, useMemo, useEffect, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Sphere, Line, Text, Float } from "@react-three/drei";
+import { CameraControls, Sphere, Line, Text, Float } from "@react-three/drei";
 import * as THREE from "three";
 
 // ─────────────────────────────────────────────
@@ -232,18 +232,25 @@ export function SkillTree3D({
                 {...node}
                 onClick={(e: any) => {
                   e.stopPropagation();
+                  const controls = (window as any).cameraControls;
+                  if (controls) {
+                    controls.setLookAt(
+                      node.position[0], node.position[1], node.position[2] + 5,
+                      node.position[0], node.position[1], node.position[2],
+                      true
+                    );
+                  }
                   if (onNodeClick) onNodeClick(node);
                 }}
               />
             ))}
           </group>
 
-          <OrbitControls
-            enablePan={false}
+          <CameraControls
+            ref={(ref) => { (window as any).cameraControls = ref; }}
+            makeDefault
             minDistance={3}
             maxDistance={18}
-            autoRotate
-            autoRotateSpeed={0.5}
           />
         </Canvas>
       )}

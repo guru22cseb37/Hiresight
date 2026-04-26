@@ -10,14 +10,25 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, 
-  Tooltip, ResponsiveContainer 
-} from "recharts";
+import dynamic from "next/dynamic";
+import { useState, useEffect } from "react";
+
+const AutonomousAgentHub = dynamic(() => import("@/components/dashboard/AutonomousAgentHub").then(mod => mod.AutonomousAgentHub), {
+  ssr: false,
+  loading: () => <div className="h-96 w-full glass animate-pulse rounded-[32px] border border-white/5" />
+});
+
+const ResponsiveContainer = dynamic(() => import("recharts").then(mod => mod.ResponsiveContainer), { ssr: false });
+const AreaChart = dynamic(() => import("recharts").then(mod => mod.AreaChart), { ssr: false });
+const Area = dynamic(() => import("recharts").then(mod => mod.Area), { ssr: false });
+const XAxis = dynamic(() => import("recharts").then(mod => mod.XAxis), { ssr: false });
+const YAxis = dynamic(() => import("recharts").then(mod => mod.YAxis), { ssr: false });
+const CartesianGrid = dynamic(() => import("recharts").then(mod => mod.CartesianGrid), { ssr: false });
+const Tooltip = dynamic(() => import("recharts").then(mod => mod.Tooltip), { ssr: false });
+
 import Link from "next/link";
 import { Badge } from "../../components/ui/badge";
 import { cn } from "@/lib/utils";
-import { AutonomousAgentHub } from "@/components/dashboard/AutonomousAgentHub";
 
 const chartData = [
   { name: "Mon", score: 65 },
@@ -28,8 +39,6 @@ const chartData = [
   { name: "Sat", score: 84 },
   { name: "Sun", score: 88 },
 ];
-
-import { useState, useEffect } from "react";
 
 export default function DashboardPage() {
   const [journeyScore, setJourneyScore] = useState(25);

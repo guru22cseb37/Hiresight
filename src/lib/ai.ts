@@ -122,3 +122,40 @@ export async function evaluateStarResponse(question: string, answer: string) {
 
   return JSON.parse(cleanJSON(result));
 }
+
+/**
+ * Streaming AI Helper
+ */
+export async function streamAI({
+  messages,
+  model = MODELS[0],
+}: {
+  messages: any[];
+  model?: string;
+}) {
+  const key = OPENROUTER_KEYS[0];
+  if (!key) throw new Error("No OpenRouter key found for streaming.");
+
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${key}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+      "X-Title": "HireSight AI",
+    },
+    body: JSON.stringify({
+      model,
+      messages,
+      stream: true,
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error?.message || "OpenRouter Streaming Error");
+  }
+
+  return response.body;
+}
+
