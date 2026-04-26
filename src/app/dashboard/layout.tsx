@@ -9,6 +9,8 @@ import { Loader2 } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
 
+import { PageTransition } from "@/components/layout/PageTransition";
+
 export default function DashboardLayout({
   children,
 }: {
@@ -70,7 +72,9 @@ export default function DashboardLayout({
         <TopBar name={userProfile?.name} email={userProfile?.email} role="job_seeker" />
         
         <div className="p-6 md:p-10 max-w-7xl mx-auto min-h-full">
-          {children}
+          <PageTransition>
+            {children}
+          </PageTransition>
         </div>
       </main>
     </div>

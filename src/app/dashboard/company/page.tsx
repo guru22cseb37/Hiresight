@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { ProcessingStepper } from "@/components/ui/ProcessingStepper";
+import { Sparkles } from "lucide-react";
 
 export default function CompanyIntelligencePage() {
   const [query, setQuery] = useState("");
@@ -191,12 +193,12 @@ export default function CompanyIntelligencePage() {
             </Card>
           </motion.div>
         ) : loading ? (
-          <div className="h-96 flex flex-col items-center justify-center gap-6 animate-pulse">
-             <div className="w-20 h-20 rounded-full border-b-2 border-blue-500 animate-spin" />
-             <div className="text-center">
-               <h3 className="text-xl font-bold text-white italic uppercase tracking-widest">Scanning Global Databases...</h3>
-               <p className="text-slate-500 text-sm mt-2 font-medium">Cross-referencing domain history and company records.</p>
+          <div className="h-96 flex flex-col items-center justify-center gap-10">
+             <div className="relative">
+                <div className="w-24 h-24 rounded-full border-b-2 border-blue-500 animate-spin" />
+                <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-blue-500 animate-pulse" />
              </div>
+             <ProcessingStepper isProcessing={loading} />
           </div>
         ) : (
           <div className="h-64 flex flex-col items-center justify-center text-center opacity-20">

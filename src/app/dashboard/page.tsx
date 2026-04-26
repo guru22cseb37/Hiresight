@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import dynamic from "next/dynamic";
 import { useState, useEffect } from "react";
 
+import { Magnetic } from "@/components/ui/Magnetic";
+
 const AutonomousAgentHub = dynamic(() => import("@/components/dashboard/AutonomousAgentHub").then(mod => mod.AutonomousAgentHub), {
   ssr: false,
   loading: () => <div className="h-96 w-full glass animate-pulse rounded-[32px] border border-white/5" />
@@ -79,10 +81,12 @@ export default function DashboardPage() {
           
           <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
             <Link href="/dashboard/analyze" className="w-full">
-              <Button className="w-full h-14 md:h-16 px-8 md:px-10 bg-blue-600 hover:bg-blue-500 text-base md:text-lg font-black italic rounded-xl md:rounded-2xl gap-3 shadow-2xl shadow-blue-500/30 transition-all hover:scale-105 active:scale-95">
-                <Plus className="w-5 h-5 md:w-6 md:h-6" />
-                NEW ANALYSIS
-              </Button>
+              <Magnetic strength={0.3}>
+                <Button className="w-full h-14 md:h-16 px-8 md:px-10 bg-blue-600 hover:bg-blue-500 text-base md:text-lg font-black italic rounded-xl md:rounded-2xl gap-3 shadow-2xl shadow-blue-500/30 transition-all hover:scale-105 active:scale-95">
+                  <Plus className="w-5 h-5 md:w-6 md:h-6" />
+                  NEW ANALYSIS
+                </Button>
+              </Magnetic>
             </Link>
           </div>
         </div>
