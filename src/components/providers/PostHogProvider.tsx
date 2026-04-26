@@ -4,11 +4,12 @@ import { PostHogProvider } from 'posthog-js/react'
 
 const POSTHOG_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY;
 
-if (typeof window !== 'undefined' && POSTHOG_KEY) {
-  posthog.init(POSTHOG_KEY, {
+// Disabled PostHog for the review to prevent console noise
+if (typeof window !== 'undefined' && false) {
+  posthog.init(POSTHOG_KEY!, {
     api_host: "https://us.i.posthog.com",
     person_profiles: 'always', 
-    capture_pageview: false // Disable automatic capture if it causes issues during auth
+    capture_pageview: false 
   })
 }
 
