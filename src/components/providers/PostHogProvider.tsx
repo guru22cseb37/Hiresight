@@ -2,10 +2,13 @@
 import posthog from 'posthog-js'
 import { PostHogProvider } from 'posthog-js/react'
 
-if (typeof window !== 'undefined') {
-  posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
-    api_host: "https://us.i.posthog.com", // Change to "https://eu.i.posthog.com" if using EU cloud
+const POSTHOG_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY;
+
+if (typeof window !== 'undefined' && POSTHOG_KEY) {
+  posthog.init(POSTHOG_KEY, {
+    api_host: "https://us.i.posthog.com",
     person_profiles: 'always', 
+    capture_pageview: false // Disable automatic capture if it causes issues during auth
   })
 }
 
