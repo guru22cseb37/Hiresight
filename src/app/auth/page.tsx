@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Chrome, Mail, Lock, ArrowLeft, Loader2, User as UserIcon } from "lucide-react";
 import Link from "next/link";
 import { supabase, Role } from "@/lib/supabase";
@@ -28,6 +28,14 @@ function AuthForm() {
   const [role, setRole] = useState<Role>("job_seeker");
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showErrorImage, setShowErrorImage] = useState(false);
+
+  useEffect(() => {
+    if (showErrorImage) {
+      const timer = setTimeout(() => setShowErrorImage(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showErrorImage]);
 
   useEffect(() => {
     const clearBrokenSession = async () => {
@@ -79,6 +87,7 @@ function AuthForm() {
       }
     } catch (error: any) {
       toast.error(error.message || "Authentication failed");
+      setShowErrorImage(true);
     } finally {
       setLoading(false);
     }
@@ -93,6 +102,7 @@ function AuthForm() {
       if (error) throw error;
     } catch (error: any) {
       toast.error(error.message);
+      setShowErrorImage(true);
     }
   };
 
@@ -115,6 +125,46 @@ function AuthForm() {
         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
         <span className="text-sm font-medium">Back to Home</span>
       </Link>
+
+      <AnimatePresence>
+        {showErrorImage && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md"
+          >
+            <motion.div 
+              className="relative max-w-lg w-full glass border-red-500/50 overflow-hidden rounded-[40px] shadow-[0_0_50px_rgba(239,68,68,0.3)]"
+            >
+              <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent" />
+              <div className="p-8 text-center space-y-6">
+                <div className="inline-flex w-16 h-16 rounded-full bg-red-500/20 items-center justify-center mb-2">
+                   <Lock className="w-8 h-8 text-red-500 animate-pulse" />
+                </div>
+                <div>
+                   <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter">Access Denied.</h2>
+                   <p className="text-slate-400 text-sm mt-2">Security protocols engaged. Incorrect credentials detected.</p>
+                </div>
+                <div className="relative rounded-2xl overflow-hidden border border-white/10 aspect-video group">
+                   <img 
+                     src="/images/WhatsApp Image 2026-04-28 at 1.47.43 AM.jpeg" 
+                     alt="Security Alert" 
+                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                   />
+                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                </div>
+                <Button 
+                  onClick={() => setShowErrorImage(false)}
+                  className="w-full bg-red-600 hover:bg-red-500 text-white font-bold tracking-widest uppercase h-12"
+                >
+                  Acknowledge
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <motion.div
         initial={{ y: 20, opacity: 0 }}
