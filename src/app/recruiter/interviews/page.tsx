@@ -18,8 +18,56 @@ import { cn } from "@/lib/utils";
 
 export default function InterviewIntelligencePage() {
   const [loading, setLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const [results, setResults] = useState<any>(null);
   const [transcript, setTranscript] = useState("");
+  const recognitionRef = useRef<any>(null);
+
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      return;
+    }
+
+    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error("Speech Recognition is not supported in this browser.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = "en-US";
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      toast.success("Voice Assistant Active: Start Speaking");
+    };
+
+    recognition.onresult = (event: any) => {
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          setTranscript(prev => prev + (prev ? " " : "") + event.results[i][0].transcript);
+        }
+      }
+    };
+
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
 
   const handleExtract = async () => {
     if (!transcript.trim()) {
@@ -132,12 +180,38 @@ export default function InterviewIntelligencePage() {
               </Card>
             </motion.div>
           ) : (
-            <div className="h-full min-h-[500px] flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-[40px] bg-white/[0.01] p-12 text-center">
-              <Mic className="w-12 h-12 text-slate-800 mb-4" />
-              <h3 className="text-white font-bold italic uppercase tracking-tighter">Voice of Talent</h3>
-              <p className="text-slate-600 text-[11px] mt-2 max-w-[250px] font-medium leading-relaxed uppercase">
-                Synchronize interview data to unlock the extraction engine.
+            <div className="h-full min-h-[500px] flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-[40px] bg-white/[0.01] p-12 text-center group">
+              <div className="relative mb-8">
+                {isListening && (
+                  <motion.div 
+                    animate={{ scale: [1, 1.5, 1], opacity: [0.3, 0, 0.3] }}
+                    transition={{ repeat: Infinity, duration: 2 }}
+                    className="absolute inset-0 bg-violet-500 rounded-full blur-3xl"
+                  />
+                )}
+                <Button 
+                  onClick={toggleListening}
+                  className={cn(
+                    "w-24 h-24 rounded-full flex items-center justify-center transition-all duration-500 relative z-10",
+                    isListening ? "bg-red-500 hover:bg-red-600 shadow-[0_0_30px_rgba(239,68,68,0.5)]" : "bg-violet-600 hover:bg-violet-500 shadow-xl"
+                  )}
+                >
+                  {isListening ? <Loader2 className="w-10 h-10 animate-spin" /> : <Mic className="w-10 h-10" />}
+                </Button>
+              </div>
+              
+              <h3 className="text-white font-bold italic uppercase tracking-tighter text-2xl">
+                {isListening ? "LISTENING..." : "VOICE OF TALENT"}
+              </h3>
+              <p className="text-slate-600 text-xs mt-3 max-w-[280px] font-medium leading-relaxed uppercase tracking-widest">
+                {isListening ? "DICTATE YOUR NOTES NOW. THE AI WILL TYPE AUTOMATICALLY." : "TAP THE MIC TO ENABLE VOICE-TO-TEXT ASSISTANT FOR YOUR TRANSCRIPT."}
               </p>
+
+              {!isListening && (
+                <Badge variant="outline" className="mt-8 bg-violet-500/5 text-violet-400 border-violet-500/20 px-6 py-2 rounded-full font-black text-[10px] tracking-widest">
+                  ELITE RECRUITER MODE
+                </Badge>
+              )}
             </div>
           )}
         </div>
