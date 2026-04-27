@@ -5,7 +5,8 @@ import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-mo
 import { 
   Check, X, Zap, User, MapPin, 
   DollarSign, Sparkles, BrainCircuit,
-  Trophy, Star, Github, Linkedin, ExternalLink
+  Trophy, Star, Github, Linkedin, ExternalLink,
+  Mail
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -75,7 +76,7 @@ function LegendItem({ label, color }: { label: string, color: string }) {
   );
 }
 
-function MapPingPoint({ x, y, name, role }: { x: string, y: string, name: string, role: string }) {
+function MapPingPoint({ x, y, name, role, email, bio, exp }: { x: string, y: string, name: string, role: string, email: string, bio: string, exp: string }) {
   return (
     <motion.div 
       initial={{ scale: 0 }}
@@ -84,13 +85,41 @@ function MapPingPoint({ x, y, name, role }: { x: string, y: string, name: string
       style={{ left: x, top: y }}
     >
       <div className="relative">
-         <div className="w-3 h-3 bg-violet-500 rounded-full shadow-[0_0_15px_rgba(139,92,246,0.8)]" />
-         <div className="absolute inset-0 w-3 h-3 bg-violet-500 rounded-full animate-ping opacity-75" />
+         <div className="w-4 h-4 bg-violet-500 rounded-full shadow-[0_0_20px_rgba(139,92,246,1)] border-2 border-white/20" />
+         <div className="absolute inset-0 w-4 h-4 bg-violet-500 rounded-full animate-ping opacity-75" />
          
-         <div className="absolute top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all pointer-events-none z-30">
-            <div className="glass border-white/10 p-3 rounded-xl min-w-[120px] shadow-2xl">
-               <div className="text-[10px] font-black text-white italic">{name}</div>
-               <div className="text-[8px] text-violet-400 font-bold uppercase tracking-widest">{role}</div>
+         <div className="absolute top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-50 scale-95 group-hover:scale-100 translate-y-2 group-hover:translate-y-0">
+            <div className="glass border-violet-500/30 p-6 rounded-[30px] min-w-[320px] shadow-[0_30px_60px_rgba(0,0,0,0.5)] space-y-4 backdrop-blur-2xl bg-slate-950/90">
+               <div className="flex items-center gap-4 border-b border-white/5 pb-4">
+                  <div className="w-12 h-12 rounded-2xl bg-violet-600/20 flex items-center justify-center text-violet-400 font-black text-xl">
+                     {name[0]}
+                  </div>
+                  <div>
+                     <div className="text-sm font-black text-white italic uppercase tracking-tighter">{name}</div>
+                     <div className="text-[9px] text-violet-400 font-bold uppercase tracking-widest">{role}</div>
+                  </div>
+               </div>
+
+               <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-slate-400">
+                     <Mail className="w-3.5 h-3.5 text-violet-500" />
+                     <span className="text-[10px] font-bold">{email}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-slate-400">
+                     <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                     <span className="text-[10px] font-bold">{exp} Experience</span>
+                  </div>
+               </div>
+
+               <div className="space-y-2">
+                  <div className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Neural Bio</div>
+                  <p className="text-[10px] text-slate-400 leading-relaxed font-medium italic">"{bio}"</p>
+               </div>
+
+               <div className="pt-2 border-t border-white/5 flex justify-between items-center">
+                  <Badge className="bg-violet-500/10 text-violet-400 border-violet-500/20 text-[8px] font-black uppercase">Elite Tier</Badge>
+                  <span className="text-[8px] text-slate-600 font-black uppercase">Click to shortlist</span>
+               </div>
             </div>
          </div>
       </div>
@@ -244,11 +273,46 @@ export default function RecruiterDiscoveryPage() {
            <div className="absolute inset-0 flex items-center justify-center">
               <div className="relative w-[800px] h-[400px]">
                  {/* Map Pings with Metadata */}
-                 <MapPingPoint x="20%" y="30%" name="Alex Rivera" role="Rust Architect" />
-                 <MapPingPoint x="75%" y="25%" name="Sarah Chen" role="AI Research" />
-                 <MapPingPoint x="45%" y="60%" name="Jordan Smith" role="UI Lead" />
-                 <MapPingPoint x="85%" y="70%" name="Elena Rodriguez" role="Designer" />
-                 <MapPingPoint x="15%" y="80%" name="Marcus Miller" role="Systems Expert" />
+                 <MapPingPoint 
+                   x="20%" y="30%" 
+                   name={candidates[0].name} 
+                   role={candidates[0].role} 
+                   email="alex.r@tech.io"
+                   bio={candidates[0].bio}
+                   exp={candidates[0].experience}
+                 />
+                 <MapPingPoint 
+                   x="75%" y="25%" 
+                   name={candidates[1].name} 
+                   role={candidates[1].role} 
+                   email="sarah.chen@ai.org"
+                   bio={candidates[1].bio}
+                   exp={candidates[1].experience}
+                 />
+                 <MapPingPoint 
+                   x="45%" y="60%" 
+                   name={candidates[2].name} 
+                   role={candidates[2].role} 
+                   email="jordan.lead@design.com"
+                   bio={candidates[2].bio}
+                   exp={candidates[2].experience}
+                 />
+                 <MapPingPoint 
+                   x="85%" y="70%" 
+                   name="Elena Rodriguez" 
+                   role="Designer" 
+                   email="elena.r@ux.io"
+                   bio="Expert in high-fidelity prototyping and design systems for FAANG level products."
+                   exp="6 Years"
+                 />
+                 <MapPingPoint 
+                   x="15%" y="80%" 
+                   name="Marcus Miller" 
+                   role="Systems Expert" 
+                   email="m.miller@infra.net"
+                   bio="Built the backbone for several Series C fintechs. Specializes in Go and Kubernetes."
+                   exp="12 Years"
+                 />
               </div>
            </div>
            
