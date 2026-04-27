@@ -55,10 +55,21 @@ export default function InterviewIntelligencePage() {
     };
 
     recognition.onresult = (event: any) => {
+      let finalTranscript = "";
       for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcriptSegment = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-          setTranscript(prev => prev + (prev ? " " : "") + event.results[i][0].transcript);
+          finalTranscript += transcriptSegment;
         }
+      }
+      
+      if (finalTranscript) {
+        setTranscript(prev => {
+          // Prevent double-appending the same segment if onresult triggers rapidly
+          const trimmedPrev = prev.trim();
+          if (trimmedPrev.endsWith(finalTranscript.trim())) return prev;
+          return prev + (prev ? " " : "") + finalTranscript;
+        });
       }
     };
 
