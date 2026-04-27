@@ -73,7 +73,7 @@ export default function MockInterviewPage() {
         {/* Left: 3D Robot & Tracks (4 columns) */}
         <div className="lg:col-span-5 space-y-8">
            <div className="relative h-[450px] glass rounded-[40px] overflow-hidden border-white/10">
-              <RobotScene isPasswordFocused={isListening || isThinking} />
+              <RobotScene isPasswordFocused={isListening || isThinking} isLoggedIn={true} />
               <div className="absolute top-6 left-6">
                  <Badge className="bg-blue-600/20 text-blue-400 border-blue-500/30 px-3 py-1 backdrop-blur-xl">
                     AI AGENT ACTIVE
