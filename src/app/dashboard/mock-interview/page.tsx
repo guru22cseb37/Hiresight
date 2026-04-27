@@ -26,6 +26,16 @@ export default function MockInterviewPage() {
   const [chatHistory, setChatHistory] = useState<{role: 'user' | 'assistant', content: string}[]>([]);
   const [userInput, setUserInput] = useState("");
   const recognitionRef = useRef<any>(null);
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const stopSpeaking = () => {
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current.currentTime = 0;
+      currentAudioRef.current = null;
+      toast.info("Robot silenced.");
+    }
+  };
 
   // Speech-to-Text Logic
   useEffect(() => {
@@ -58,6 +68,7 @@ export default function MockInterviewPage() {
 
   useEffect(() => {
     if (isListening) {
+      stopSpeaking(); // Stop AI speaking when user starts talking
       recognitionRef.current?.start();
       toast.info("Robot is listening... Speak clearly!");
     } else {
@@ -66,12 +77,15 @@ export default function MockInterviewPage() {
   }, [isListening]);
 
   const startInterview = async () => {
+    stopSpeaking();
     setIsThinking(true);
     const welcome = `Welcome to your ${selectedTrack} interview. I am your HireSight AI agent. Let's begin. Describe your experience with ${selectedTrack}, or ask me to teach you something from scratch!`;
     
-    const audioBase64 = await speak(welcome.replace(/[#*`]/g, "")); // Clean markdown for voice
+    const audioBase64 = await speak(welcome.replace(/[#*`]/g, "")); 
     if (audioBase64) {
-      new Audio(`data:audio/wav;base64,${audioBase64}`).play();
+      const audio = new Audio(`data:audio/wav;base64,${audioBase64}`);
+      currentAudioRef.current = audio;
+      audio.play();
     }
     
     setChatHistory([{ role: 'assistant', content: welcome }]);
@@ -81,6 +95,7 @@ export default function MockInterviewPage() {
   const handleSend = async (text: string) => {
     if (!text.trim()) return;
     
+    stopSpeaking();
     const newHistory = [...chatHistory, { role: 'user', content: text }] as any[];
     setChatHistory(prev => [...prev, { role: 'user', content: text }]);
     setUserInput("");
@@ -89,9 +104,11 @@ export default function MockInterviewPage() {
     try {
       const response = await chatWithAI(selectedTrack, text, newHistory);
 
-      const audioBase64 = await speak(response.replace(/[#*`]/g, "")); // Clean markdown for voice
+      const audioBase64 = await speak(response.replace(/[#*`]/g, ""));
       if (audioBase64) {
-        new Audio(`data:audio/wav;base64,${audioBase64}`).play();
+        const audio = new Audio(`data:audio/wav;base64,${audioBase64}`);
+        currentAudioRef.current = audio;
+        audio.play();
       }
 
       setChatHistory(prev => [...prev, { role: 'assistant', content: response }]);
@@ -209,20 +226,26 @@ export default function MockInterviewPage() {
                   </Button>
                </div>
 
-               <div className="grid grid-cols-2 gap-4">
+               <div className="grid grid-cols-3 gap-2">
                  <Button 
                   onClick={startInterview}
                   disabled={isThinking}
-                  className="h-14 rounded-2xl glass border-white/10 hover:bg-white/5 text-blue-400 font-black uppercase tracking-widest gap-2"
+                  className="h-14 rounded-2xl glass border-white/10 hover:bg-white/5 text-blue-400 font-black uppercase tracking-widest gap-2 text-[10px]"
                  >
-                   <Sparkles className="w-4 h-4" /> START NEW SESSION
+                   <Sparkles className="w-4 h-4" /> RESTART
                  </Button>
                  <Button 
                   onClick={() => setIsListening(!isListening)}
-                  className={`h-14 rounded-2xl font-black uppercase tracking-widest gap-2 transition-all ${isListening ? 'bg-red-500 text-white' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                  className={`h-14 rounded-2xl font-black uppercase tracking-widest gap-2 transition-all text-[10px] ${isListening ? 'bg-red-500 text-white' : 'bg-white/10 text-white hover:bg-white/20'}`}
                  >
                    {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                   {isListening ? 'VOICE ON' : 'ACTIVATE VOICE'}
+                   {isListening ? 'VOICE ON' : 'LISTEN'}
+                 </Button>
+                 <Button 
+                  onClick={stopSpeaking}
+                  className="h-14 rounded-2xl glass border-white/10 hover:bg-white/5 text-slate-400 font-black uppercase tracking-widest gap-2 text-[10px]"
+                 >
+                   <Volume2 className="w-4 h-4" /> SILENCE
                  </Button>
                </div>
             </div>
