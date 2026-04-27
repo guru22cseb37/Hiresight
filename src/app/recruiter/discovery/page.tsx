@@ -52,6 +52,29 @@ const MOCK_CANDIDATES = [
   }
 ];
 
+function ConnectionLine({ x1, y1, x2, y2 }: { x1: string, y1: string, x2: string, y2: string }) {
+  return (
+    <motion.line 
+      x1={x1} y1={y1} x2={x2} y2={y2}
+      stroke="url(#flowGradient)"
+      strokeWidth="1"
+      strokeDasharray="10,10"
+      initial={{ pathLength: 0, opacity: 0 }}
+      animate={{ pathLength: 1, opacity: 0.3 }}
+      transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+    />
+  );
+}
+
+function LegendItem({ label, color }: { label: string, color: string }) {
+  return (
+    <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/50 border border-white/5 backdrop-blur-md">
+       <div className={`w-2 h-2 rounded-full ${color} shadow-[0_0_10px_currentColor]`} />
+       <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">{label}</span>
+    </div>
+  );
+}
+
 function MapPingPoint({ x, y, name, role }: { x: string, y: string, name: string, role: string }) {
   return (
     <motion.div 
@@ -181,35 +204,68 @@ export default function RecruiterDiscoveryPage() {
           )}
         </div>
       ) : (
-        <div className="w-full max-w-5xl h-[650px] glass border-white/5 rounded-[40px] relative overflow-hidden bg-slate-950/50">
-           {/* Futuristic Map Simulation */}
-           <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
+        <div className="w-full max-w-5xl h-[650px] glass border-white/5 rounded-[40px] relative overflow-hidden bg-slate-950/80 shadow-[0_0_50px_rgba(139,92,246,0.1)]">
+           {/* CINEMATIC GRID & MAP SILHOUETTE */}
+           <div className="absolute inset-0 opacity-30 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px]" />
+           
+           <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none scale-110">
+              <svg viewBox="0 0 1000 500" className="w-full h-full fill-violet-500">
+                 <path d="M150,150 Q250,50 350,150 T550,150 T750,250 T950,150" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="5,5" />
+                 <circle cx="200" cy="150" r="100" fill="currentColor" opacity="0.1" />
+                 <circle cx="500" cy="250" r="150" fill="currentColor" opacity="0.1" />
+                 <circle cx="800" cy="180" r="120" fill="currentColor" opacity="0.1" />
+              </svg>
+           </div>
+
+           {/* RADAL SWEEP ANIMATION */}
+           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <motion.div 
+                animate={{ rotate: 360 }}
+                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                className="w-[1000px] h-[1000px] rounded-full bg-[conic-gradient(from_0deg,transparent_0deg,rgba(139,92,246,0.1)_90deg,transparent_91deg)] z-10"
+              />
+           </div>
+
+           {/* NEURAL CONNECTIONS (SVG) */}
+           <svg className="absolute inset-0 w-full h-full pointer-events-none z-20">
+              <defs>
+                 <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="transparent" />
+                    <stop offset="50%" stopColor="#8b5cf6" />
+                    <stop offset="100%" stopColor="transparent" />
+                 </linearGradient>
+              </defs>
+              <ConnectionLine x1="20%" y1="30%" x2="45%" y2="60%" />
+              <ConnectionLine x1="45%" y1="60%" x2="75%" y2="25%" />
+              <ConnectionLine x1="75%" y1="25%" x2="85%" y2="70%" />
+              <ConnectionLine x1="15%" y1="80%" x2="45%" y2="60%" />
+           </svg>
+
            <div className="absolute inset-0 flex items-center justify-center">
               <div className="relative w-[800px] h-[400px]">
-                 {/* Map Pings */}
-                 <MapPingPoint x="20%" y="30%" name="Alex" role="Rust Expert" />
-                 <MapPingPoint x="75%" y="25%" name="Sarah" role="AI Research" />
-                 <MapPingPoint x="45%" y="60%" name="Jordan" role="UI Lead" />
-                 <MapPingPoint x="85%" y="70%" name="Elena" role="Design" />
-                 <MapPingPoint x="15%" y="80%" name="Marcus" role="Architect" />
-                 
-                 {/* Scanning Lines */}
-                 <motion.div 
-                   animate={{ x: ['0%', '100%', '0%'] }}
-                   transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                   className="absolute top-0 bottom-0 w-px bg-violet-500/50 shadow-[0_0_20px_rgba(139,92,246,0.5)] z-20"
-                 />
+                 {/* Map Pings with Metadata */}
+                 <MapPingPoint x="20%" y="30%" name="Alex Rivera" role="Rust Architect" />
+                 <MapPingPoint x="75%" y="25%" name="Sarah Chen" role="AI Research" />
+                 <MapPingPoint x="45%" y="60%" name="Jordan Smith" role="UI Lead" />
+                 <MapPingPoint x="85%" y="70%" name="Elena Rodriguez" role="Designer" />
+                 <MapPingPoint x="15%" y="80%" name="Marcus Miller" role="Systems Expert" />
               </div>
            </div>
            
-           <div className="absolute bottom-10 left-10 p-6 glass border-white/5 rounded-2xl max-w-xs space-y-4">
+           <div className="absolute bottom-10 left-10 p-6 glass border-white/5 rounded-2xl max-w-xs space-y-4 z-30 shadow-2xl">
               <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                 <Sparkles className="w-4 h-4 text-violet-400" />
-                 Global Intelligence
+                 <BrainCircuit className="w-4 h-4 text-violet-400" />
+                 Global Sourcing Intel
               </h4>
-              <p className="text-xs text-slate-500 leading-relaxed italic">
-                 "Our bots are currently tracking 14,202 elite engineers across 42 countries. 5 high-probability matches identified in your current timezone."
+              <p className="text-xs text-slate-500 leading-relaxed italic font-medium">
+                 "Neural Radar has identified 5 high-probability 'Elite' pings. These individuals match your 'High Performance' engineering profile with 94%+ accuracy."
               </p>
+           </div>
+
+           {/* MAP LEGEND */}
+           <div className="absolute top-10 right-10 flex flex-col gap-2 z-30">
+              <LegendItem label="Active Ping" color="bg-violet-500" />
+              <LegendItem label="Neural Link" color="bg-violet-500/20" />
            </div>
         </div>
       )}
