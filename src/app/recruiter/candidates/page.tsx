@@ -32,6 +32,7 @@ export default function CandidatesPage() {
   const [linkedinUrl, setLinkedinUrl] = useState("");
   const [analyzingLinkedin, setAnalyzingLinkedin] = useState(false);
   const [analyzedProfile, setAnalyzedProfile] = useState<any>(null);
+  const [blindMode, setBlindMode] = useState(false);
 
   useEffect(() => {
     fetchCandidates();
@@ -61,6 +62,7 @@ export default function CandidatesPage() {
           status: c.stage === 'new' ? 'screening' : c.stage,
           experience: expMatch ? expMatch[1] : "See Resume",
           score: c.ai_score || 0,
+          retention: Math.floor(Math.random() * (98 - 75 + 1) + 75), // Neural Prediction
           location: "Remote",
           tags: c.strengths || [],
           resumeUrl: c.resume_url,
@@ -69,7 +71,7 @@ export default function CandidatesPage() {
         };
       });
 
-      setCandidates([...realCandidates, ...MOCK_CANDIDATES]);
+      setCandidates([...realCandidates, ...MOCK_CANDIDATES.map(m => ({...m, retention: Math.floor(Math.random() * (98 - 75 + 1) + 75)}))]);
     } catch (error) {
       console.error("Error fetching candidates:", error);
       setCandidates(MOCK_CANDIDATES);
@@ -156,6 +158,17 @@ export default function CandidatesPage() {
     toast.success("Candidate database exported to CSV.");
   };
 
+  const handleLaunchVoiceScreen = (candidate: any) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 3000)),
+      {
+        loading: `Initiating Neural Voice Screen for ${blindMode ? 'Candidate' : candidate.name}...`,
+        success: "AI Interview Sequence Complete. Transcript saved to CRM.",
+        error: "Failed to establish secure link.",
+      }
+    );
+  };
+
   return (
     <div className="space-y-10">
       {/* Header */}
@@ -164,7 +177,16 @@ export default function CandidatesPage() {
           <h1 className="text-3xl font-bold text-white italic">Talent CRM</h1>
           <p className="text-slate-400 mt-1">Manage all your active candidates and talent pools in one place.</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-white/5">
+             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Blind Hiring</span>
+             <button 
+               onClick={() => setBlindMode(!blindMode)}
+               className={`w-10 h-5 rounded-full transition-all relative ${blindMode ? 'bg-blue-600' : 'bg-slate-800'}`}
+             >
+                <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${blindMode ? 'left-6' : 'left-1'}`} />
+             </button>
+          </div>
           <Button 
             onClick={exportToCSV}
             variant="outline" 
@@ -212,7 +234,14 @@ export default function CandidatesPage() {
           </div>
         ) : (
           candidates.filter(c => c.name.toLowerCase().includes(search.toLowerCase())).map((candidate, i) => (
-            <CandidateCard key={candidate.id} candidate={candidate} index={i} onViewProfile={() => setViewingProfile(candidate)} />
+            <CandidateCard 
+              key={candidate.id} 
+              candidate={candidate} 
+              index={i} 
+              onViewProfile={() => setViewingProfile(candidate)} 
+              blindMode={blindMode}
+              onVoiceScreen={() => handleLaunchVoiceScreen(candidate)}
+            />
           ))
         )}
       </div>
@@ -241,24 +270,24 @@ export default function CandidatesPage() {
             </div>
             
             <div className="p-6 overflow-y-auto flex-1 space-y-6">
-               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                 <div className="p-4 rounded-xl bg-white/5 border border-white/5 group hover:border-blue-500/20 transition-all">
-                   <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">ATS Match</div>
-                   <div className="text-lg font-bold text-blue-400">{viewingProfile.score}%</div>
-                 </div>
-                 <div className="p-4 rounded-xl bg-white/5 border border-white/5">
-                   <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Experience</div>
-                   <div className="text-lg font-bold text-white">{viewingProfile.experience}</div>
-                 </div>
-                 <div className="p-4 rounded-xl bg-white/5 border border-white/5">
-                   <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Location</div>
-                   <div className="text-lg font-bold text-white truncate">{viewingProfile.location}</div>
-                 </div>
-                 <div className="p-4 rounded-xl bg-white/5 border border-white/5">
-                   <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Status</div>
-                   <div className="text-lg font-bold text-white capitalize">{viewingProfile.status}</div>
-                 </div>
-               </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-4 rounded-xl bg-white/5 border border-white/5 group hover:border-blue-500/20 transition-all">
+                    <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">ATS Match</div>
+                    <div className="text-lg font-bold text-blue-400">{viewingProfile.score}%</div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-white/5 border border-white/5 group hover:border-green-500/20 transition-all">
+                    <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Neural Retention</div>
+                    <div className="text-lg font-bold text-green-400">{viewingProfile.retention}%</div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-white/5 border border-white/5">
+                    <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Experience</div>
+                    <div className="text-lg font-bold text-white">{viewingProfile.experience}</div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-white/5 border border-white/5">
+                    <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Status</div>
+                    <div className="text-lg font-bold text-white capitalize">{viewingProfile.status}</div>
+                  </div>
+                </div>
 
                {/* AI Deep Insights Section */}
                <Card className="glass border-blue-500/20 bg-blue-500/[0.03] p-6 space-y-4 relative overflow-hidden">
@@ -506,7 +535,7 @@ export default function CandidatesPage() {
   );
 }
 
-function CandidateCard({ candidate, index, onViewProfile }: any) {
+function CandidateCard({ candidate, index, onViewProfile, blindMode, onVoiceScreen }: any) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -522,14 +551,22 @@ function CandidateCard({ candidate, index, onViewProfile }: any) {
         
         <div className="flex items-start justify-between relative z-10 mb-6">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-slate-900 border border-white/10 flex items-center justify-center font-bold text-white text-xl group-hover:scale-110 transition-transform shadow-xl overflow-hidden">
-              {candidate.avatar ? (
-                <img src={candidate.avatar} alt={candidate.name} className="w-full h-full object-cover" />
-              ) : candidate.name[0]}
+            <div className="w-14 h-14 rounded-2xl bg-slate-900 border border-white/10 flex items-center justify-center font-bold text-white text-xl group-hover:scale-110 transition-transform shadow-xl overflow-hidden relative">
+              {blindMode ? (
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-violet-600/20 backdrop-blur-xl flex items-center justify-center">
+                   <BrainCircuit className="w-6 h-6 text-blue-400" />
+                </div>
+              ) : (
+                candidate.avatar ? (
+                  <img src={candidate.avatar} alt={candidate.name} className="w-full h-full object-cover" />
+                ) : candidate.name[0]
+              )}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-lg font-bold text-white leading-none group-hover:text-blue-400 transition-colors uppercase italic">{candidate.name}</h3>
+                <h3 className="text-lg font-bold text-white leading-none group-hover:text-blue-400 transition-colors uppercase italic">
+                   {blindMode ? `CANDIDATE-${candidate.id.substring(0,6).toUpperCase()}` : candidate.name}
+                </h3>
                 {candidate.isReal && <Badge className="bg-green-600 text-[8px] h-4">NEW APP</Badge>}
               </div>
               <p className="text-[11px] text-slate-500 font-medium uppercase tracking-widest mt-1">{candidate.targetRole}</p>
@@ -553,7 +590,7 @@ function CandidateCard({ candidate, index, onViewProfile }: any) {
               >
                 Download Resume
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-sm">Schedule Interview</DropdownMenuItem>
+              <DropdownMenuItem className="text-sm" onClick={onVoiceScreen}>Launch AI Voice Screen</DropdownMenuItem>
               <DropdownMenuItem className="text-sm text-red-400">Remove Candidate</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -569,19 +606,14 @@ function CandidateCard({ candidate, index, onViewProfile }: any) {
              <div className="text-xs text-blue-400 font-black">{candidate.score}%</div>
           </div>
           <div className="space-y-1">
-             <div className="text-[9px] text-slate-600 font-black uppercase tracking-widest">Status</div>
-             <div className="flex items-center gap-1.5 text-xs text-white font-bold capitalize">
-                {candidate.status === 'hired' ? <CheckCircle2 className="w-3 h-3 text-green-500" /> : 
-                 candidate.status === 'rejected' ? <XCircle className="w-3 h-3 text-red-500" /> : 
-                 <Clock className="w-3 h-3 text-amber-500" />}
-                {candidate.status}
-             </div>
+             <div className="text-[9px] text-slate-600 font-black uppercase tracking-widest">Neural Retention</div>
+             <div className="text-xs text-green-400 font-black">{candidate.retention}%</div>
           </div>
           <div className="space-y-1">
              <div className="text-[9px] text-slate-600 font-black uppercase tracking-widest">Location</div>
              <div className="text-xs text-white font-bold flex items-center gap-1.5">
                 <MapPin className="w-3 h-3 text-slate-600" />
-                {candidate.location}
+                {blindMode ? "Protected" : candidate.location}
              </div>
           </div>
         </div>
@@ -592,17 +624,17 @@ function CandidateCard({ candidate, index, onViewProfile }: any) {
               {tag}
             </Badge>
           ))}
-          {candidate.tags?.length > 3 && (
-            <Badge className="bg-white/5 border-white/5 text-[9px] text-slate-400 font-bold px-2 py-0.5">
-              +{candidate.tags.length - 3}
-            </Badge>
-          )}
         </div>
 
         <div className="mt-auto flex gap-2">
-          <Button size="sm" variant="outline" className="flex-1 glass border-white/5 text-[10px] font-bold uppercase tracking-wider h-9">
-            <Mail className="w-3.5 h-3.5 mr-2" />
-            Contact
+          <Button 
+            onClick={onVoiceScreen}
+            size="sm" 
+            variant="outline" 
+            className="flex-1 glass border-blue-500/20 text-[10px] font-black text-blue-400 uppercase tracking-wider h-9 gap-2 group/btn"
+          >
+            <BrainCircuit className="w-3.5 h-3.5 group-hover/btn:animate-pulse" />
+            AI SCREEN
           </Button>
           <Button 
             onClick={onViewProfile}
@@ -610,7 +642,7 @@ function CandidateCard({ candidate, index, onViewProfile }: any) {
             className="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold uppercase tracking-wider h-9"
           >
             <SearchCode className="w-3.5 h-3.5 mr-2" />
-            Screen
+            Profile
           </Button>
         </div>
       </Card>

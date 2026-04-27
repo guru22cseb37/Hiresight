@@ -52,14 +52,39 @@ const MOCK_CANDIDATES = [
   }
 ];
 
+function MapPingPoint({ x, y, name, role }: { x: string, y: string, name: string, role: string }) {
+  return (
+    <motion.div 
+      initial={{ scale: 0 }}
+      animate={{ scale: 1 }}
+      className="absolute group cursor-crosshair"
+      style={{ left: x, top: y }}
+    >
+      <div className="relative">
+         <div className="w-3 h-3 bg-violet-500 rounded-full shadow-[0_0_15px_rgba(139,92,246,0.8)]" />
+         <div className="absolute inset-0 w-3 h-3 bg-violet-500 rounded-full animate-ping opacity-75" />
+         
+         <div className="absolute top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all pointer-events-none z-30">
+            <div className="glass border-white/10 p-3 rounded-xl min-w-[120px] shadow-2xl">
+               <div className="text-[10px] font-black text-white italic">{name}</div>
+               <div className="text-[8px] text-violet-400 font-bold uppercase tracking-widest">{role}</div>
+            </div>
+         </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function RecruiterDiscoveryPage() {
   const [candidates, setCandidates] = useState(MOCK_CANDIDATES);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showMap, setShowMap] = useState(false);
+  const [autonomousMode, setAutonomousMode] = useState(false);
 
   const handleSwipe = (direction: 'like' | 'pass') => {
     if (direction === 'like') {
-      toast.success(`Invitation sent to ${candidates[currentIndex].name}!`, {
-        description: "They will be notified of your interest immediately.",
+      toast.success(autonomousMode ? "Autonomous Sequence Initiated" : `Invitation sent to ${candidates[currentIndex].name}!`, {
+        description: autonomousMode ? "AI Agent will handle follow-ups and scheduling." : "They will be notified of your interest immediately.",
         icon: <Zap className="w-4 h-4 text-violet-500" />
       });
     }
@@ -72,55 +97,124 @@ export default function RecruiterDiscoveryPage() {
   };
 
   return (
-    <div className="min-h-full flex flex-col items-center justify-center py-10 relative overflow-hidden">
+    <div className="min-h-full flex flex-col items-center py-10 relative overflow-hidden">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-violet-600/5 rounded-full blur-[120px] -z-10" />
       
-      <div className="text-center mb-12 space-y-4">
-        <Badge variant="outline" className="bg-violet-600/10 text-violet-400 border-violet-600/20 px-4 py-1 font-black tracking-widest uppercase italic">
-          Candidate Radar v2.0
-        </Badge>
-        <h1 className="text-4xl md:text-6xl font-black text-white italic tracking-tighter uppercase leading-none">
-          HIRE THE <span className="text-violet-500">ELITE.</span>
-        </h1>
-        <p className="text-slate-500 font-medium max-w-lg mx-auto">
-          Our AI scans GitHub, LinkedIn, and portfolios to find the top 1% talent that fits your specific engineering culture.
-        </p>
+      <div className="w-full max-w-5xl flex items-center justify-between mb-12">
+        <div className="space-y-2">
+          <Badge variant="outline" className="bg-violet-600/10 text-violet-400 border-violet-600/20 px-4 py-1 font-black tracking-widest uppercase italic">
+            Radar v2.0 Protocol
+          </Badge>
+          <h1 className="text-4xl font-black text-white italic tracking-tighter uppercase leading-none">
+            HIRE THE <span className="text-violet-500">ELITE.</span>
+          </h1>
+        </div>
+
+        <div className="flex items-center gap-4">
+           {/* Autonomous Toggle */}
+           <div className="flex items-center gap-3 px-4 py-2 rounded-2xl bg-slate-900/50 border border-white/5 backdrop-blur-xl">
+              <div className="flex flex-col">
+                 <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Autonomous</span>
+                 <span className="text-[10px] font-bold text-white leading-none">Sovereign Mode</span>
+              </div>
+              <button 
+                onClick={() => setAutonomousMode(!autonomousMode)}
+                className={`w-10 h-5 rounded-full transition-all relative ${autonomousMode ? 'bg-violet-600' : 'bg-slate-800'}`}
+              >
+                 <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${autonomousMode ? 'left-6' : 'left-1'}`} />
+              </button>
+           </div>
+
+           {/* View Switcher */}
+           <div className="flex p-1 rounded-2xl bg-slate-900 border border-white/5">
+              <Button 
+                onClick={() => setShowMap(false)}
+                variant="ghost" 
+                className={`h-10 px-4 rounded-xl text-xs font-bold gap-2 ${!showMap ? 'bg-white/5 text-white' : 'text-slate-500'}`}
+              >
+                <Zap className="w-4 h-4" />
+                Radar
+              </Button>
+              <Button 
+                onClick={() => setShowMap(true)}
+                variant="ghost" 
+                className={`h-10 px-4 rounded-xl text-xs font-bold gap-2 ${showMap ? 'bg-white/5 text-white' : 'text-slate-500'}`}
+              >
+                <MapPin className="w-4 h-4" />
+                Talent Map
+              </Button>
+           </div>
+        </div>
       </div>
 
-      <div className="relative w-full max-w-md h-[650px] perspective-1000">
-        <AnimatePresence mode="popLayout">
-          {candidates.slice(currentIndex, currentIndex + 1).map((candidate) => (
-            <CandidateCard 
-              key={candidate.id} 
-              candidate={candidate} 
-              onSwipe={handleSwipe}
-            />
-          ))}
-        </AnimatePresence>
-        
-        {currentIndex === candidates.length && (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="absolute inset-0 flex flex-col items-center justify-center text-center p-8 glass rounded-[40px] border-white/5"
-          >
-            <div className="w-20 h-20 rounded-3xl bg-violet-600/10 flex items-center justify-center mb-6">
-              <Zap className="w-10 h-10 text-violet-500" />
-            </div>
-            <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter">Radar Silent.</h3>
-            <p className="text-slate-500 mt-2 mb-8">All matching candidates have been screened. Our bots are scanning global networks for more talent...</p>
-            <Button 
-              variant="outline" 
-              onClick={() => setCurrentIndex(0)}
-              className="glass border-white/10 text-white font-bold tracking-widest uppercase h-12 px-8"
+      {!showMap ? (
+        <div className="relative w-full max-w-md h-[650px] perspective-1000">
+          <AnimatePresence mode="popLayout">
+            {candidates.slice(currentIndex, currentIndex + 1).map((candidate) => (
+              <CandidateCard 
+                key={candidate.id} 
+                candidate={candidate} 
+                onSwipe={handleSwipe}
+              />
+            ))}
+          </AnimatePresence>
+          
+          {currentIndex === candidates.length && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="absolute inset-0 flex flex-col items-center justify-center text-center p-8 glass rounded-[40px] border-white/5"
             >
-              Refresh Radar
-            </Button>
-          </motion.div>
-        )}
-      </div>
+              <div className="w-20 h-20 rounded-3xl bg-violet-600/10 flex items-center justify-center mb-6">
+                <Zap className="w-10 h-10 text-violet-500" />
+              </div>
+              <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter">Radar Silent.</h3>
+              <p className="text-slate-500 mt-2 mb-8">All matching candidates have been screened. Our bots are scanning global networks for more talent...</p>
+              <Button 
+                variant="outline" 
+                onClick={() => setCurrentIndex(0)}
+                className="glass border-white/10 text-white font-bold tracking-widest uppercase h-12 px-8"
+              >
+                Refresh Radar
+              </Button>
+            </motion.div>
+          )}
+        </div>
+      ) : (
+        <div className="w-full max-w-5xl h-[650px] glass border-white/5 rounded-[40px] relative overflow-hidden bg-slate-950/50">
+           {/* Futuristic Map Simulation */}
+           <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
+           <div className="absolute inset-0 flex items-center justify-center">
+              <div className="relative w-[800px] h-[400px]">
+                 {/* Map Pings */}
+                 <MapPingPoint x="20%" y="30%" name="Alex" role="Rust Expert" />
+                 <MapPingPoint x="75%" y="25%" name="Sarah" role="AI Research" />
+                 <MapPingPoint x="45%" y="60%" name="Jordan" role="UI Lead" />
+                 <MapPingPoint x="85%" y="70%" name="Elena" role="Design" />
+                 <MapPingPoint x="15%" y="80%" name="Marcus" role="Architect" />
+                 
+                 {/* Scanning Lines */}
+                 <motion.div 
+                   animate={{ x: ['0%', '100%', '0%'] }}
+                   transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                   className="absolute top-0 bottom-0 w-px bg-violet-500/50 shadow-[0_0_20px_rgba(139,92,246,0.5)] z-20"
+                 />
+              </div>
+           </div>
+           
+           <div className="absolute bottom-10 left-10 p-6 glass border-white/5 rounded-2xl max-w-xs space-y-4">
+              <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                 <Sparkles className="w-4 h-4 text-violet-400" />
+                 Global Intelligence
+              </h4>
+              <p className="text-xs text-slate-500 leading-relaxed italic">
+                 "Our bots are currently tracking 14,202 elite engineers across 42 countries. 5 high-probability matches identified in your current timezone."
+              </p>
+           </div>
+        </div>
+      )}
 
-      {currentIndex < candidates.length && (
+      {!showMap && currentIndex < candidates.length && (
         <div className="flex items-center gap-8 mt-12">
           <button 
             onClick={() => handleSwipe('pass')}
@@ -146,6 +240,8 @@ export default function RecruiterDiscoveryPage() {
     </div>
   );
 }
+
+
 
 function CandidateCard({ candidate, onSwipe }: { candidate: any, onSwipe: (dir: 'like' | 'pass') => void }) {
   const x = useMotionValue(0);
