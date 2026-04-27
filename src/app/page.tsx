@@ -11,8 +11,21 @@ import { motion } from "framer-motion";
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-background selection:bg-blue-500/30">
-      <Navbar />
+    <main className="min-h-screen bg-background selection:bg-blue-500/30 relative overflow-hidden">
+      {/* Grand Masterpiece Background */}
+      <div 
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: 'url("/landing-bg.png")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          opacity: 0.4,
+        }}
+      />
+      <div className="fixed inset-0 bg-gradient-to-b from-background via-transparent to-background z-0" />
+      
+      <div className="relative z-10">
+        <Navbar />
       
       <div className="pt-10">
         <Hero />
