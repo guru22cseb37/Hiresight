@@ -131,12 +131,11 @@ export default function MockInterviewPage() {
                      ? 'bg-white/5 border border-white/5 text-slate-200 rounded-tl-none' 
                      : 'bg-blue-600 text-white rounded-tr-none'
                    }`}>
-                     <ReactMarkdown 
-                        remarkPlugins={[remarkGfm]}
-                        className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-black/50 prose-pre:border prose-pre:border-white/10"
-                     >
-                        {msg.content}
-                     </ReactMarkdown>
+                     <div className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-black/50 prose-pre:border prose-pre:border-white/10">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                           {msg.content}
+                        </ReactMarkdown>
+                     </div>
                    </div>
                  </motion.div>
                ))}
