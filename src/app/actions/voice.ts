@@ -1,32 +1,28 @@
 "use server";
 
-import { DeepgramClient } from "@deepgram/sdk";
-
-const deepgram = new DeepgramClient(process.env.DEEPGRAM_API_KEY!);
-
 export async function speak(text: string) {
+  if (!process.env.DEEPGRAM_API_KEY) {
+    console.error("DEEPGRAM_API_KEY is not set");
+    return null;
+  }
+
   try {
-    const response = await deepgram.speak.request(
-      { text },
-      {
-        model: "aura-asteria-en", // Elite female voice
-        encoding: "linear16",
-        container: "wav",
-      }
-    );
+    const response = await fetch("https://api.deepgram.com/v1/speak?model=aura-asteria-en", {
+      method: "POST",
+      headers: {
+        "Authorization": `Token ${process.env.DEEPGRAM_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ text }),
+    });
 
-    const stream = await response.getStream();
-    if (!stream) throw new Error("No audio stream returned");
-
-    const reader = stream.getReader();
-    const chunks = [];
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Deepgram API error: ${response.status} - ${errorText}`);
     }
 
-    const buffer = Buffer.concat(chunks);
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
     return buffer.toString("base64");
   } catch (error) {
     console.error("Deepgram TTS Error:", error);
