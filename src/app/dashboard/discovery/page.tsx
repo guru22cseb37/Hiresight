@@ -58,13 +58,24 @@ const MOCK_JOBS = [
   }
 ];
 
+import { saveUserPreference } from "@/app/actions/learning";
+import { supabase } from "@/lib/supabase";
+
 export default function DiscoveryPage() {
   const [jobs, setJobs] = useState(MOCK_JOBS);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const handleSwipe = (direction: 'like' | 'pass') => {
+  const handleSwipe = async (direction: 'like' | 'pass') => {
+    const job = jobs[currentIndex];
+    
+    // Learning Engine: Save preference in background
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      saveUserPreference(user.id, job, direction);
+    }
+
     if (direction === 'like') {
-      toast.success(`Matched with ${jobs[currentIndex].company}!`, {
+      toast.success(`Matched with ${job.company}!`, {
         description: "Application sequence initiated autonomously.",
         icon: <Zap className="w-4 h-4 text-yellow-500" />
       });
@@ -73,7 +84,6 @@ export default function DiscoveryPage() {
     if (currentIndex < jobs.length - 1) {
       setCurrentIndex(prev => prev + 1);
     } else {
-      // Logic for "No more jobs" - could fetch more
       toast.info("No more jobs in your area! Check back later.");
     }
   };
