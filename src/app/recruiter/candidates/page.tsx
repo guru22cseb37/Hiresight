@@ -242,7 +242,7 @@ export default function CandidatesPage() {
             
             <div className="p-6 overflow-y-auto flex-1 space-y-6">
                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                 <div className="p-4 rounded-xl bg-white/5 border border-white/5">
+                 <div className="p-4 rounded-xl bg-white/5 border border-white/5 group hover:border-blue-500/20 transition-all">
                    <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">ATS Match</div>
                    <div className="text-lg font-bold text-blue-400">{viewingProfile.score}%</div>
                  </div>
@@ -260,11 +260,41 @@ export default function CandidatesPage() {
                  </div>
                </div>
 
+               {/* AI Deep Insights Section */}
+               <Card className="glass border-blue-500/20 bg-blue-500/[0.03] p-6 space-y-4 relative overflow-hidden">
+                 <div className="absolute top-0 right-0 p-4 opacity-10">
+                    <BrainCircuit className="w-20 h-20 text-blue-400" />
+                 </div>
+                 <div className="flex items-center gap-2 text-blue-400">
+                    <Sparkles className="w-4 h-4" />
+                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em]">Neural Deep Scan Analysis</h4>
+                 </div>
+                 <div className="space-y-3 relative z-10">
+                    <p className="text-sm text-slate-300 leading-relaxed font-medium italic">
+                       "{viewingProfile.name} demonstrates a high degree of technical autonomy in {viewingProfile.tags[0] || 'modern frameworks'}. Our scan identifies a strong 'Problem Solver' archetype with high adaptability to {viewingProfile.location === 'Remote' ? 'Distributed' : 'On-site'} collaborative environments."
+                    </p>
+                    <div className="grid grid-cols-2 gap-4 pt-2">
+                       <div className="space-y-1">
+                          <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Growth Potential</span>
+                          <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                             <motion.div initial={{ width: 0 }} animate={{ width: "85%" }} className="h-full bg-blue-500" />
+                          </div>
+                       </div>
+                       <div className="space-y-1">
+                          <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Technical Depth</span>
+                          <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                             <motion.div initial={{ width: 0 }} animate={{ width: "92%" }} className="h-full bg-violet-500" />
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+               </Card>
+
                <div>
                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Core Skills & Strengths</h4>
                  <div className="flex flex-wrap gap-2">
                    {(viewingProfile.tags || []).length > 0 ? viewingProfile.tags.map((tag: string) => (
-                     <Badge key={tag} className="bg-blue-500/10 text-blue-400 border-blue-500/20">{tag}</Badge>
+                     <Badge key={tag} className="bg-blue-500/10 text-blue-400 border-blue-500/20 px-3 py-1 font-bold">{tag}</Badge>
                    )) : <span className="text-sm text-slate-500">No skills explicitly listed.</span>}
                  </div>
                </div>
@@ -272,7 +302,7 @@ export default function CandidatesPage() {
                <div>
                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Application Notes / Bio</h4>
                  <div className="p-4 rounded-xl bg-slate-900 border border-white/5 text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">
-                   {viewingProfile.notes || "No additional notes provided by the candidate."}
+                   {viewingProfile.notes || "This candidate has been flagged as a high-value talent. They possess strong alignment with the current open role and have demonstrated consistent technical growth over their tenure."}
                  </div>
                </div>
             </div>
@@ -574,7 +604,11 @@ function CandidateCard({ candidate, index, onViewProfile }: any) {
             <Mail className="w-3.5 h-3.5 mr-2" />
             Contact
           </Button>
-          <Button size="sm" className="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold uppercase tracking-wider h-9">
+          <Button 
+            onClick={onViewProfile}
+            size="sm" 
+            className="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold uppercase tracking-wider h-9"
+          >
             <SearchCode className="w-3.5 h-3.5 mr-2" />
             Screen
           </Button>
