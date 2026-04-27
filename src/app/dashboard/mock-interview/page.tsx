@@ -19,6 +19,15 @@ const INTERVIEW_TRACKS = [
   "Fullstack Web", "Embedded Systems"
 ];
 
+const cleanTextForSpeech = (text: string) => {
+  return text
+    .replace(/[#*`~_]/g, "") // Remove common markdown
+    .replace(/[=-]{3,}/g, "") // Remove long separators like === or ---
+    .replace(/\[.*\]\(.*\)/g, "") // Remove links
+    .replace(/\s+/g, " ") // Collapse whitespace
+    .trim();
+};
+
 export default function MockInterviewPage() {
   const [selectedTrack, setSelectedTrack] = useState(INTERVIEW_TRACKS[0]);
   const [isListening, setIsListening] = useState(false);
@@ -100,7 +109,7 @@ export default function MockInterviewPage() {
     
     const welcome = `Welcome to your ELITE ${selectedTrack} interview. I am your HireSight AI agent. Today we will dive deep into architecture and fundamentals. Are you ready to begin?`;
     
-    const audioBase64 = await speak(welcome.replace(/[#*`]/g, "")); 
+    const audioBase64 = await speak(cleanTextForSpeech(welcome)); 
     if (audioBase64) {
       const audio = new Audio(`data:audio/wav;base64,${audioBase64}`);
       currentAudioRef.current = audio;
@@ -123,7 +132,7 @@ export default function MockInterviewPage() {
     try {
       const response = await chatWithAI(selectedTrack, text, newHistory);
 
-      const audioBase64 = await speak(response.replace(/[#*`]/g, ""));
+      const audioBase64 = await speak(cleanTextForSpeech(response));
       if (audioBase64) {
         const audio = new Audio(`data:audio/wav;base64,${audioBase64}`);
         currentAudioRef.current = audio;
