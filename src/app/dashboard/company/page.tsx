@@ -51,7 +51,7 @@ export default function CompanyIntelligencePage() {
   return (
     <div className="min-h-screen bg-black text-white p-8 relative overflow-hidden">
       {/* Cinematic Background Masterpiece */}
-      <div className="absolute inset-0 bg-[url('/global_corporate_hq_masterpiece_bg_1777307511308.png')] bg-cover bg-center opacity-40 scale-105 pointer-events-none" />
+      <div className="absolute inset-0 bg-[url('/company-bg.png')] bg-cover bg-center opacity-40 scale-105 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-b from-blue-900/30 via-transparent to-black pointer-events-none" />
 
       <div className="relative z-10 max-w-5xl mx-auto space-y-12 pt-20 text-center">
