@@ -48,9 +48,10 @@ export default function DashboardPage() {
   return (
     <div className="space-y-12 pb-20">
       {/* ELITE HERO SECTION */}
-      <div className="relative p-6 md:p-14 rounded-[32px] md:rounded-[40px] bg-slate-900 border border-white/5 overflow-hidden group">
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-blue-600/10 to-transparent pointer-events-none" />
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/10 blur-[100px] rounded-full group-hover:bg-blue-500/20 transition-all duration-1000" />
+      <div className="relative p-6 md:p-14 rounded-[32px] md:rounded-[40px] bg-slate-950 border border-white/5 overflow-hidden group">
+        {/* Elite Command Center Background */}
+        <div className="absolute inset-0 bg-[url('/command-bg.png')] bg-cover bg-center opacity-35 group-hover:scale-110 transition-transform duration-[4000ms] pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent pointer-events-none" />
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
           <div className="space-y-4">
