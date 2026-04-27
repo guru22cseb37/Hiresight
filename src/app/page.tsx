@@ -35,7 +35,8 @@ export default function LandingPage() {
         <CTASection />
       </div>
 
-      <Footer />
+        <Footer />
+      </div>
     </main>
   );
 }
