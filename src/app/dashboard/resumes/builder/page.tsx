@@ -260,43 +260,87 @@ export default function ResumeBuilderPage() {
                 </div>
               </div>
 
-              <div className="space-y-10">
-                  {/* Experience */}
-                  <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 space-y-4">
-                    <div className="flex items-center justify-between">
-                       <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">Experience Block</h4>
-                       <Badge variant="outline" className="text-[8px] border-white/10 text-slate-500">ATS PRIMARY</Badge>
+              <div className="space-y-12">
+                  {/* Experience Section */}
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between px-2">
+                       <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Professional Experience</h4>
+                       <Button 
+                         size="sm" 
+                         variant="ghost" 
+                         onClick={() => setFormData({...formData, experience: [...formData.experience, { title: "", company: "", period: "", description: "" }]})}
+                         className="h-8 text-[9px] font-black text-blue-500 hover:text-blue-400 gap-1.5"
+                       >
+                         <Plus className="w-3 h-3" /> ADD EXPERIENCE
+                       </Button>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                       <FormInput label="Job Title" value={formData.experience[0].title} onChange={(v: string) => {
-                         const n = [...formData.experience]; n[0].title = v; setFormData({...formData, experience: n});
-                       }} />
-                       <FormInput label="Company" value={formData.experience[0].company} onChange={(v: string) => {
-                         const n = [...formData.experience]; n[0].company = v; setFormData({...formData, experience: n});
-                       }} />
-                    </div>
-                    <FormInput label="Impact & Achievements (Use Metrics)" isTextArea value={formData.experience[0].description} onChange={(v: string) => {
-                         const n = [...formData.experience]; n[0].description = v; setFormData({...formData, experience: n});
-                       }} />
+                    
+                    {formData.experience.map((exp, idx) => (
+                      <div key={idx} className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 space-y-4 relative group">
+                        {idx > 0 && (
+                          <button 
+                            onClick={() => {
+                              const n = formData.experience.filter((_, i) => i !== idx);
+                              setFormData({...formData, experience: n});
+                            }}
+                            className="absolute top-4 right-4 p-2 rounded-lg bg-red-500/10 text-red-500 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500 hover:text-white"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                           <FormInput label="Job Title" value={exp.title} onChange={(v: string) => {
+                             const n = [...formData.experience]; n[idx].title = v; setFormData({...formData, experience: n});
+                           }} />
+                           <FormInput label="Company" value={exp.company} onChange={(v: string) => {
+                             const n = [...formData.experience]; n[idx].company = v; setFormData({...formData, experience: n});
+                           }} />
+                        </div>
+                        <FormInput label="Impact & Achievements (Use Metrics)" isTextArea value={exp.description} onChange={(v: string) => {
+                             const n = [...formData.experience]; n[idx].description = v; setFormData({...formData, experience: n});
+                           }} />
+                      </div>
+                    ))}
                   </div>
 
-                  {/* Projects */}
-                  <div className="p-6 rounded-3xl bg-violet-500/[0.03] border border-violet-500/10 space-y-4">
-                    <div className="flex items-center justify-between">
-                       <h4 className="text-xs font-black text-violet-400 uppercase tracking-widest">Technical Project</h4>
-                       <Badge variant="outline" className="text-[8px] border-violet-500/20 text-violet-500">ENGINEERING PRIDE</Badge>
+                  {/* Projects Section */}
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between px-2">
+                       <h4 className="text-[10px] font-black text-violet-400 uppercase tracking-widest">Technical Projects</h4>
+                       <Button 
+                         size="sm" 
+                         variant="ghost" 
+                         onClick={() => setFormData({...formData, projects: [...formData.projects, { title: "", tech: "", description: "" }]})}
+                         className="h-8 text-[9px] font-black text-violet-500 hover:text-violet-400 gap-1.5"
+                       >
+                         <Plus className="w-3 h-3" /> ADD PROJECT
+                       </Button>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                       <FormInput label="Project Title" value={formData.projects[0].title} onChange={(v: string) => {
-                         const n = [...formData.projects]; n[0].title = v; setFormData({...formData, projects: n});
-                       }} />
-                       <FormInput label="Tech Stack (e.g. Next.js, Rust)" value={formData.projects[0].tech} onChange={(v: string) => {
-                         const n = [...formData.projects]; n[0].tech = v; setFormData({...formData, projects: n});
-                       }} />
-                    </div>
-                    <FormInput label="Key Contributions & Architecture" isTextArea value={formData.projects[0].description} onChange={(v: string) => {
-                         const n = [...formData.projects]; n[0].description = v; setFormData({...formData, projects: n});
-                       }} />
+
+                    {formData.projects.map((proj, idx) => (
+                      <div key={idx} className="p-6 rounded-3xl bg-violet-500/[0.03] border border-violet-500/10 space-y-4 relative group">
+                        <button 
+                          onClick={() => {
+                            const n = formData.projects.filter((_, i) => i !== idx);
+                            setFormData({...formData, projects: n});
+                          }}
+                          className="absolute top-4 right-4 p-2 rounded-lg bg-red-500/10 text-red-500 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500 hover:text-white"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                           <FormInput label="Project Title" value={proj.title} onChange={(v: string) => {
+                             const n = [...formData.projects]; n[idx].title = v; setFormData({...formData, projects: n});
+                           }} />
+                           <FormInput label="Tech Stack (e.g. Next.js, Rust)" value={proj.tech} onChange={(v: string) => {
+                             const n = [...formData.projects]; n[idx].tech = v; setFormData({...formData, projects: n});
+                           }} />
+                        </div>
+                        <FormInput label="Key Contributions & Architecture" isTextArea value={proj.description} onChange={(v: string) => {
+                             const n = [...formData.projects]; n[idx].description = v; setFormData({...formData, projects: n});
+                           }} />
+                      </div>
+                    ))}
                   </div>
 
                   <FormInput label="Strategic Core Skills (Comma separated)" value={formData.skills} onChange={(v: string) => setFormData({...formData, skills: v})} isTextArea />
