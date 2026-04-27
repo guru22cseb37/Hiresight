@@ -50,6 +50,17 @@ export default function MockInterviewPage() {
       recognitionRef.current.onresult = (event: any) => {
         let interimTranscript = '';
         for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const transcript = event.results[i][0].transcript.toLowerCase().trim();
+          
+          // VOICE COMMAND: Emergency Stop
+          if (transcript === "stop" || transcript === "silence" || transcript === "shut up") {
+            stopSpeaking();
+            setIsListening(false);
+            setUserInput("");
+            toast.info("Voice command: Agent Silenced.");
+            return;
+          }
+
           if (event.results[i].isFinal) {
             const finalTranscript = event.results[i][0].transcript;
             setUserInput(finalTranscript);
