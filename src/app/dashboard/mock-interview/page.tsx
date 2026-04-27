@@ -6,6 +6,7 @@ import { Mic, MicOff, Volume2, Sparkles, BrainCircuit, ShieldCheck, Zap } from "
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import { chatWithAI } from "@/app/actions/interview";
 import { speak } from "@/app/actions/voice";
 import RobotScene from "@/components/auth/RobotScene";
