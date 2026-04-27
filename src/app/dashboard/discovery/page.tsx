@@ -156,7 +156,27 @@ export default function DiscoveryPage() {
   );
 }
 
+import { getCompanyNews } from "@/app/actions/news";
+
 function DiscoveryCard({ job, onSwipe }: { job: any, onSwipe: (dir: 'like' | 'pass') => void }) {
+  const [news, setNews] = useState<any[]>([]);
+  const [loadingNews, setLoadingNews] = useState(true);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      setLoadingNews(true);
+      try {
+        const articles = await getCompanyNews(job.company);
+        setNews(articles);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingNews(false);
+      }
+    };
+    fetchNews();
+  }, [job.company]);
+
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-15, 15]);
   const opacity = useTransform(x, [-200, -150, 0, 150, 200], [0, 1, 1, 1, 0]);
@@ -279,6 +299,41 @@ function DiscoveryCard({ job, onSwipe }: { job: any, onSwipe: (dir: 'like' | 'pa
                 <Zap className="w-3 h-3 group-hover:animate-bounce" />
                 AI TAILOR RESUME FOR THIS ROLE
               </Button>
+           </div>
+
+           {/* LATEST NEWS SECTION */}
+           <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                 <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Latest Company News</h4>
+                 <Badge variant="outline" className="text-[8px] border-blue-500/20 text-blue-400">LIVE INTEL</Badge>
+              </div>
+              
+              {loadingNews ? (
+                <div className="space-y-2 animate-pulse">
+                   <div className="h-4 bg-white/5 rounded w-3/4" />
+                   <div className="h-4 bg-white/5 rounded w-1/2" />
+                </div>
+              ) : news.length > 0 ? (
+                <div className="space-y-3">
+                   {news.map((article: any, idx: number) => (
+                      <a 
+                        key={idx} 
+                        href={article.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="block p-3 rounded-xl bg-white/5 border border-white/5 hover:border-blue-500/30 hover:bg-blue-500/5 transition-all group/news"
+                      >
+                         <h5 className="text-[11px] font-bold text-slate-200 line-clamp-1 group-hover/news:text-blue-400 transition-colors">{article.title}</h5>
+                         <div className="flex items-center justify-between mt-1">
+                            <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">{article.source}</span>
+                            <span className="text-[8px] font-medium text-slate-600">{new Date(article.publishedAt).toLocaleDateString()}</span>
+                         </div>
+                      </a>
+                   ))}
+                </div>
+              ) : (
+                <p className="text-[10px] text-slate-500 italic">No recent news found for this company.</p>
+              )}
            </div>
 
            <div className="pt-4 flex flex-wrap gap-2">
