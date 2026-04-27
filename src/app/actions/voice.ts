@@ -1,8 +1,8 @@
 "use server";
 
-import { createClient } from "@deepgram/sdk";
+import { DeepgramClient } from "@deepgram/sdk";
 
-const deepgram = createClient(process.env.DEEPGRAM_API_KEY!);
+const deepgram = new DeepgramClient(process.env.DEEPGRAM_API_KEY!);
 
 export async function speak(text: string) {
   try {
