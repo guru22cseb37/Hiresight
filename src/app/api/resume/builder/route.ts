@@ -6,19 +6,23 @@ export async function POST(req: Request) {
     const { userData, referenceImage, referenceText, jobDesc } = await req.json();
 
     let prompt = `
-      Create a professional, ATS-optimized LaTeX resume for the following candidate:
+      Create the WORLD'S BEST, SOVEREIGN-LEVEL LaTeX resume for the following candidate:
       CANDIDATE DATA: ${JSON.stringify(userData)}
+      TEMPLATE ARCHITECTURE: ${userData.template || "Maverick"}
       
-      ${jobDesc ? `TARGET JOB DESCRIPTION: ${jobDesc}` : ""}
+      ${jobDesc ? `ATS REVERSE ENGINEERING: Deeply analyze this Job Description: ${jobDesc}. Identify critical technical keywords, soft skills, and industry terms. INJECT these keywords semantically into the resume bullet points while maintaining a natural, powerful tone.` : ""}
       
-      ${referenceText || referenceImage ? `REFERENCE STYLE/STRUCTURE: Please mimic the style, layout, and structure of the provided reference.` : "Use a modern, clean, single-column LaTeX template similar to the 'Jake's Resume' or 'Deedy Resume' styles found on Overleaf."}
+      ${referenceText || referenceImage ? `NEURAL TEMPLATE CLONING: Analyze the provided reference image/text. Replicate its structural DNA, including margin ratios, section spacing, and font hierarchy, with pixel-perfect LaTeX accuracy.` : `Use the '${userData.template || "Maverick"}' architecture:
+        - Maverick: Modern, dual-column if necessary, bold sans-serif headers, clean impact.
+        - Executive: Classic single-column, serif fonts, authoritative spacing, professional elegance.
+        - Engineer: High-density technical layout, bold tech stacks per project, monochrome, ultra-precise.`}
       
-      Requirements:
-      1. Output ONLY the complete LaTeX code.
-      2. Ensure all LaTeX packages used are standard (e.g., geometry, hyperref, enumitem, titlesec).
-      3. Optimize content for ATS by using standard section headers (Experience, Education, Skills).
-      4. If a Job Description is provided, tailor the bullet points to include relevant keywords and metrics.
-      5. Do not include any preamble or postamble text, just the code.
+      CRITICAL PERFORMANCE REQUIREMENTS:
+      1. Output ONLY the complete LaTeX code. No meta-talk.
+      2. QUANTifiable IMPACT: Every single bullet point MUST contain a hard number (%, $, time saved, users reached). NO EXCEPTIONS.
+      3. SEMANTIC KEYWORD INJECTION: If a JD is provided, ensure the resume has 100% keyword coverage for that specific role.
+      4. ATS SUPREMACY: Use geometry, hyperref, and enumitem. Ensure headers are standard (Experience, Projects, Education, Skills).
+      5. PROFESSIONAL SUMMARY: Create a high-authority 'Executive Profile' that positions the candidate as a leader in their field.
     `;
 
     const latexCode = await callAI({
