@@ -1,8 +1,8 @@
 import { Groq } from "groq-sdk";
 
 const keys = [
-  process.env.GROQ_API_KEY,
-  process.env.GROQ_API_KEY_2
+  process.env.HIRESIGHT_GROQ_PRIMARY,
+  process.env.HIRESIGHT_GROQ_SECONDARY
 ].filter(Boolean) as string[];
 
 let currentKeyIndex = 0;
