@@ -6,10 +6,11 @@ import { Mic, MicOff, Volume2, Sparkles, BrainCircuit, ShieldCheck, Zap } from "
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
-import { tailorResume } from "@/app/actions/tailor"; // Re-using Groq logic
+import { chatWithAI } from "@/app/actions/interview";
 import { speak } from "@/app/actions/voice";
 import RobotScene from "@/components/auth/RobotScene";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const INTERVIEW_TRACKS = [
   "Software Engineering", "DevOps & Cloud (AWS/Azure)", "Data Science & AI", 
@@ -21,43 +22,39 @@ export default function MockInterviewPage() {
   const [selectedTrack, setSelectedTrack] = useState(INTERVIEW_TRACKS[0]);
   const [isListening, setIsListening] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
-  const [chatHistory, setChatHistory] = useState<{role: 'user' | 'ai', content: string}[]>([]);
+  const [chatHistory, setChatHistory] = useState<{role: 'user' | 'assistant', content: string}[]>([]);
   const [userInput, setUserInput] = useState("");
 
   const startInterview = async () => {
     setIsThinking(true);
-    const welcome = `Welcome to your ${selectedTrack} interview. I am your HireSight AI agent. Let's begin. Describe your experience with ${selectedTrack}.`;
+    const welcome = `Welcome to your ${selectedTrack} interview. I am your HireSight AI agent. Let's begin. Describe your experience with ${selectedTrack}, or ask me to teach you something from scratch!`;
     
-    const audioBase64 = await speak(welcome);
+    const audioBase64 = await speak(welcome.replace(/[#*`]/g, "")); // Clean markdown for voice
     if (audioBase64) {
       new Audio(`data:audio/wav;base64,${audioBase64}`).play();
     }
     
-    setChatHistory([{ role: 'ai', content: welcome }]);
+    setChatHistory([{ role: 'assistant', content: welcome }]);
     setIsThinking(false);
   };
 
   const handleSend = async (text: string) => {
     if (!text.trim()) return;
     
+    const newHistory = [...chatHistory, { role: 'user', content: text }] as any[];
     setChatHistory(prev => [...prev, { role: 'user', content: text }]);
     setUserInput("");
     setIsThinking(true);
 
     try {
-      // Use Groq for technical response (reusing logic pattern)
-      const response = await tailorResume(
-        `Interviewer for ${selectedTrack}`, 
-        "HireSight Simulator", 
-        `User said: ${text}. Provide a short technical follow-up question or answer.`
-      );
+      const response = await chatWithAI(selectedTrack, text, newHistory);
 
-      const audioBase64 = await speak(response);
+      const audioBase64 = await speak(response.replace(/[#*`]/g, "")); // Clean markdown for voice
       if (audioBase64) {
         new Audio(`data:audio/wav;base64,${audioBase64}`).play();
       }
 
-      setChatHistory(prev => [...prev, { role: 'ai', content: response }]);
+      setChatHistory(prev => [...prev, { role: 'assistant', content: response }]);
     } catch (err) {
       toast.error("AI Response failed.");
     } finally {
@@ -123,17 +120,22 @@ export default function MockInterviewPage() {
                )}
                {chatHistory.map((msg, i) => (
                  <motion.div 
-                  initial={{ opacity: 0, x: msg.role === 'ai' ? -20 : 20 }}
+                  initial={{ opacity: 0, x: msg.role === 'assistant' ? -20 : 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   key={i} 
-                  className={`flex ${msg.role === 'ai' ? 'justify-start' : 'justify-end'}`}
+                  className={`flex ${msg.role === 'assistant' ? 'justify-start' : 'justify-end'}`}
                  >
                    <div className={`max-w-[85%] p-4 rounded-2xl text-sm font-medium leading-relaxed ${
-                     msg.role === 'ai' 
+                     msg.role === 'assistant' 
                      ? 'bg-white/5 border border-white/5 text-slate-200 rounded-tl-none' 
                      : 'bg-blue-600 text-white rounded-tr-none'
                    }`}>
-                     {msg.content}
+                     <ReactMarkdown 
+                        remarkPlugins={[remarkGfm]}
+                        className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-black/50 prose-pre:border prose-pre:border-white/10"
+                     >
+                        {msg.content}
+                     </ReactMarkdown>
                    </div>
                  </motion.div>
                ))}
