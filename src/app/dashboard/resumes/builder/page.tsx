@@ -7,7 +7,7 @@ import {
   Sparkles, Copy, Download, Layout, 
   User, Briefcase, GraduationCap, Wrench,
   Loader2, ChevronRight, ChevronLeft, AlertCircle, AlertTriangle,
-  Plus, Trash2, Eye, BrainCircuit,
+  Plus, Trash2, Eye, BrainCircuit, Calendar,
   Image as ImageIcon
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -69,7 +69,7 @@ export default function ResumeBuilderPage() {
     location: "",
     website: "",
     summary: "",
-    experience: [{ title: "", company: "", period: "", description: "" }],
+    experience: [{ title: "", company: "", period: "", description: "", startDate: "", endDate: "" }],
     projects: [{ title: "", tech: "", description: "" }],
     education: [{ school: "", degree: "", year: "" }],
     skills: "",
@@ -268,7 +268,7 @@ export default function ResumeBuilderPage() {
                        <Button 
                          size="sm" 
                          variant="ghost" 
-                         onClick={() => setFormData({...formData, experience: [...formData.experience, { title: "", company: "", period: "", description: "" }]})}
+                         onClick={() => setFormData({...formData, experience: [...formData.experience, { title: "", company: "", period: "", description: "", startDate: "", endDate: "" }]})}
                          className="h-8 text-[9px] font-black text-blue-500 hover:text-blue-400 gap-1.5"
                        >
                          <Plus className="w-3 h-3" /> ADD EXPERIENCE
@@ -295,6 +295,36 @@ export default function ResumeBuilderPage() {
                            <FormInput label="Company" value={exp.company} onChange={(v: string) => {
                              const n = [...formData.experience]; n[idx].company = v; setFormData({...formData, experience: n});
                            }} />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                           <div className="space-y-2">
+                              <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Start Date</label>
+                              <div className="relative">
+                                 <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500" />
+                                 <input 
+                                   type="date" 
+                                   className="w-full h-12 bg-slate-950/50 border border-white/5 rounded-xl pl-12 pr-4 text-xs font-medium text-white focus:border-blue-500/50 outline-none transition-all"
+                                   value={(exp as any).startDate || ""}
+                                   onChange={(e) => {
+                                      const n = [...formData.experience]; (n[idx] as any).startDate = e.target.value; setFormData({...formData, experience: n});
+                                   }}
+                                 />
+                              </div>
+                           </div>
+                           <div className="space-y-2">
+                              <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">End Date (Leave blank if present)</label>
+                              <div className="relative">
+                                 <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500" />
+                                 <input 
+                                   type="date" 
+                                   className="w-full h-12 bg-slate-950/50 border border-white/5 rounded-xl pl-12 pr-4 text-xs font-medium text-white focus:border-blue-500/50 outline-none transition-all"
+                                   value={(exp as any).endDate || ""}
+                                   onChange={(e) => {
+                                      const n = [...formData.experience]; (n[idx] as any).endDate = e.target.value; setFormData({...formData, experience: n});
+                                   }}
+                                 />
+                              </div>
+                           </div>
                         </div>
                         <FormInput label="Impact & Achievements (Use Metrics)" isTextArea value={exp.description} onChange={(v: string) => {
                              const n = [...formData.experience]; n[idx].description = v; setFormData({...formData, experience: n});
