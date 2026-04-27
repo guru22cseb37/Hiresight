@@ -19,6 +19,11 @@ const INTERVIEW_TRACKS = [
   "Fullstack Web", "Embedded Systems"
 ];
 
+const LANGUAGES = [
+  { label: "English", code: "en-US", name: "English" },
+  { label: "தமிழ்", code: "ta-IN", name: "Tamil" }
+];
+
 const cleanTextForSpeech = (text: string) => {
   return text
     .replace(/[#*`~_]/g, "") // Remove common markdown
@@ -30,6 +35,7 @@ const cleanTextForSpeech = (text: string) => {
 
 export default function MockInterviewPage() {
   const [selectedTrack, setSelectedTrack] = useState(INTERVIEW_TRACKS[0]);
+  const [selectedLang, setSelectedLang] = useState(LANGUAGES[0]);
   const [isListening, setIsListening] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
   const [chatHistory, setChatHistory] = useState<{role: 'user' | 'assistant', content: string}[]>([]);
@@ -54,6 +60,25 @@ export default function MockInterviewPage() {
     }
   };
 
+  // Hybrid Speech Logic: Deepgram for English, Browser for Tamil
+  const handleAIVoice = async (text: string) => {
+    const cleaned = cleanTextForSpeech(text);
+    
+    if (selectedLang.code === "en-US") {
+      const audioBase64 = await speak(cleaned);
+      if (audioBase64) {
+        const audio = new Audio(`data:audio/wav;base64,${audioBase64}`);
+        currentAudioRef.current = audio;
+        audio.play();
+      }
+    } else {
+      // Browser Native Speech for Tamil
+      const utterance = new SpeechSynthesisUtterance(cleaned);
+      utterance.lang = selectedLang.code;
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
   // Speech-to-Text Logic
   useEffect(() => {
     if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
@@ -61,13 +86,13 @@ export default function MockInterviewPage() {
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = true;
       recognitionRef.current.interimResults = true;
+      recognitionRef.current.lang = selectedLang.code; // Dynamic Language!
 
       recognitionRef.current.onresult = (event: any) => {
         let interimTranscript = '';
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           const transcript = event.results[i][0].transcript.toLowerCase().trim();
           
-          // URGENT VOICE COMMAND: Stop everything immediately
           if (transcript.includes("stop") || transcript.includes("silence") || transcript.includes("shut up") || transcript.includes("wait")) {
             stopSpeaking();
             setIsListening(false);
@@ -89,33 +114,29 @@ export default function MockInterviewPage() {
 
       recognitionRef.current.onerror = () => setIsListening(false);
     }
-  }, []);
+  }, [selectedLang]); // Re-initialize when language changes
 
   useEffect(() => {
     if (isListening) {
       stopSpeaking();
       recognitionRef.current?.start();
-      toast.info("Robot is listening... Speak clearly!");
+      toast.info(`Robot is listening in ${selectedLang.name}...`);
     } else {
       recognitionRef.current?.stop();
     }
-  }, [isListening]);
+  }, [isListening, selectedLang]);
 
   const startInterview = async () => {
     stopSpeaking();
     setIsThinking(true);
     setMetrics({ depth: 0, problem: 0, comms: 0 });
-    setKnowledgeNugget("Initializing AI Teacher... Ready for elite technical simulation.");
+    setKnowledgeNugget(`Initializing ${selectedLang.name} AI Teacher...`);
     
-    const welcome = `Welcome to your ELITE ${selectedTrack} interview. I am your HireSight AI agent. Today we will dive deep into architecture and fundamentals. Are you ready to begin?`;
+    const welcome = selectedLang.code === "ta-IN" 
+      ? `வணக்கம்! நான் உங்கள் ஹையர்சைட் AI உதவியாளர். ${selectedTrack} நேர்காணலைத் தொடங்கத் தயாரா?`
+      : `Welcome to your ELITE ${selectedTrack} interview. I am your HireSight AI agent. Are you ready to begin?`;
     
-    const audioBase64 = await speak(cleanTextForSpeech(welcome)); 
-    if (audioBase64) {
-      const audio = new Audio(`data:audio/wav;base64,${audioBase64}`);
-      currentAudioRef.current = audio;
-      audio.play();
-    }
-    
+    await handleAIVoice(welcome);
     setChatHistory([{ role: 'assistant', content: welcome }]);
     setIsThinking(false);
   };
@@ -130,25 +151,16 @@ export default function MockInterviewPage() {
     setIsThinking(true);
 
     try {
-      const response = await chatWithAI(selectedTrack, text, newHistory);
-
-      const audioBase64 = await speak(cleanTextForSpeech(response));
-      if (audioBase64) {
-        const audio = new Audio(`data:audio/wav;base64,${audioBase64}`);
-        currentAudioRef.current = audio;
-        audio.play();
-      }
-
+      const response = await chatWithAI(`${selectedTrack} (Language: ${selectedLang.name})`, text, newHistory);
+      await handleAIVoice(response);
       setChatHistory(prev => [...prev, { role: 'assistant', content: response }]);
       
-      // Dynamic Metric Updates (Simulated based on complexity)
       setMetrics(prev => ({
         depth: Math.min(100, prev.depth + Math.floor(Math.random() * 15)),
         problem: Math.min(100, prev.problem + Math.floor(Math.random() * 10)),
         comms: Math.min(100, prev.comms + Math.floor(Math.random() * 20))
       }));
 
-      // Extract a 'Nugget' if the response is long
       if (response.length > 200) {
         setKnowledgeNugget("💡 TIP: " + response.split('.')[0] + ".");
       }
@@ -360,6 +372,27 @@ export default function MockInterviewPage() {
                       {knowledgeNugget || "Awaiting AI insights from your session..."}
                     </motion.p>
                  </AnimatePresence>
+              </div>
+
+              <div className="flex flex-col gap-2 pt-4 border-t border-white/5">
+                 <div className="flex items-center justify-between mb-2">
+                    <span className="text-[9px] font-black text-slate-500 uppercase">Language Protocol</span>
+                 </div>
+                 <div className="grid grid-cols-2 gap-2">
+                    {LANGUAGES.map(lang => (
+                      <button
+                        key={lang.code}
+                        onClick={() => setSelectedLang(lang)}
+                        className={`p-2 rounded-xl text-[10px] font-black uppercase transition-all border ${
+                          selectedLang.code === lang.code
+                          ? 'bg-blue-600/20 border-blue-500 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.2)]'
+                          : 'bg-white/5 border-white/5 text-slate-600 hover:bg-white/10'
+                        }`}
+                      >
+                        {lang.label}
+                      </button>
+                    ))}
+                 </div>
               </div>
 
               <div className="flex flex-col gap-2 pt-4 border-t border-white/5">
