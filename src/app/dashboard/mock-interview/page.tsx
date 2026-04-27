@@ -25,6 +25,45 @@ export default function MockInterviewPage() {
   const [isThinking, setIsThinking] = useState(false);
   const [chatHistory, setChatHistory] = useState<{role: 'user' | 'assistant', content: string}[]>([]);
   const [userInput, setUserInput] = useState("");
+  const recognitionRef = useRef<any>(null);
+
+  // Speech-to-Text Logic
+  useEffect(() => {
+    if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+
+      recognitionRef.current.onresult = (event: any) => {
+        let interimTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            const finalTranscript = event.results[i][0].transcript;
+            setUserInput(finalTranscript);
+            handleSend(finalTranscript); // Automatically send when user stops speaking
+          } else {
+            interimTranscript += event.results[i][0].transcript;
+            setUserInput(interimTranscript);
+          }
+        }
+      };
+
+      recognitionRef.current.onerror = (event: any) => {
+        console.error("Speech Recognition Error", event.error);
+        setIsListening(false);
+      };
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isListening) {
+      recognitionRef.current?.start();
+      toast.info("Robot is listening... Speak clearly!");
+    } else {
+      recognitionRef.current?.stop();
+    }
+  }, [isListening]);
 
   const startInterview = async () => {
     setIsThinking(true);
