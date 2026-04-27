@@ -1,16 +1,9 @@
 "use server";
 
-import { Groq } from "groq-sdk";
-
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+import { getGroqClient, rotateKey } from "@/lib/groq-client";
 
 export async function chatWithAI(track: string, message: string, history: any[]) {
-  if (!process.env.GROQ_API_KEY) {
-    throw new Error("GROQ_API_KEY is not set");
-  }
-
+  let groq = getGroqClient();
   try {
     const completion = await groq.chat.completions.create({
       messages: [

@@ -1,10 +1,9 @@
 "use server";
 
-import { Groq } from "groq-sdk";
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+import { getGroqClient, rotateKey } from "@/lib/groq-client";
 
 export async function getTechnicalScore(userData: any) {
+  let groq = getGroqClient();
   try {
     const completion = await groq.chat.completions.create({
       messages: [
