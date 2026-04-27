@@ -21,6 +21,8 @@ const MOCK_JOBS = [
     location: "Starbase, TX (Hybrid)",
     salary: "$180k - $240k",
     score: 94,
+    probability: 88,
+    missing_skills: ["Rust", "C++20", "RTOS"],
     description: "Build the software that powers the next generation of Starship. Focus on real-time embedded systems and high-reliability C++.",
     perks: ["Equity in Mars", "Relocation Support", "Top-tier Health"],
     tags: ["C++", "Real-time", "Rust", "Aerospace"],
@@ -33,6 +35,8 @@ const MOCK_JOBS = [
     location: "Remote (Global)",
     salary: "$210k - $300k",
     score: 88,
+    probability: 72,
+    missing_skills: ["Ruby on Rails", "PCI Compliance", "Distributed Systems"],
     description: "Lead the architecture for global payment flows. Scale systems handling billions of transactions per day.",
     perks: ["Work from anywhere", "Unlimited PTO", "Home Office Stipend"],
     tags: ["React", "Ruby", "Scale", "Financial Systems"],
@@ -45,6 +49,8 @@ const MOCK_JOBS = [
     location: "San Francisco, CA",
     salary: "$250k - $400k",
     score: 91,
+    probability: 82,
+    missing_skills: ["CUDA Optimization", "Triton", "NVIDIA InfiniBand"],
     description: "Optimize large-scale GPU clusters for training Claude 4. Solve the hardest scaling laws in AI.",
     perks: ["World-class Research", "Compute Credits", "Relocation"],
     tags: ["PyTorch", "Kubernetes", "CUDA", "LLMs"],
@@ -238,16 +244,41 @@ function DiscoveryCard({ job, onSwipe }: { job: any, onSwipe: (dir: 'like' | 'pa
               </div>
            </div>
 
+           <div className="space-y-3">
+              <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Skill Gap Analysis</h4>
+              <div className="flex flex-wrap gap-2">
+                 {job.missing_skills.map((s: string) => (
+                    <div key={s} className="flex items-center gap-1 bg-red-500/10 text-red-400 border border-red-500/20 px-2 py-1 rounded-md text-[9px] font-bold uppercase">
+                       <X className="w-2.5 h-2.5" /> {s}
+                    </div>
+                 ))}
+                 <div className="flex items-center gap-1 bg-green-500/10 text-green-400 border border-green-500/20 px-2 py-1 rounded-md text-[9px] font-bold uppercase">
+                    <Check className="w-2.5 h-2.5" /> +12 more matches
+                 </div>
+              </div>
+           </div>
+
            {/* AI INSIGHT CARD */}
            <div className="mt-4 p-5 rounded-2xl bg-gradient-to-br from-blue-600/10 to-violet-600/10 border border-blue-500/20 relative group">
               <div className="absolute -top-3 -right-3 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
                  <Sparkles className="w-6 h-6 text-blue-400 animate-pulse" />
               </div>
-              <div className="flex items-center gap-3 mb-2">
-                 <Sparkles className="w-4 h-4 text-blue-400" />
-                 <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">AI MATCH INSIGHT</span>
+              <div className="flex items-center justify-between mb-2">
+                 <div className="flex items-center gap-3">
+                    <Sparkles className="w-4 h-4 text-blue-400" />
+                    <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">AI MATCH INSIGHT</span>
+                 </div>
+                 <div className="flex flex-col items-end">
+                    <span className="text-[10px] font-black text-green-400 uppercase tracking-widest">Prob. of Interview</span>
+                    <span className="text-sm font-black text-green-400">{job.probability}%</span>
+                 </div>
               </div>
-              <p className="text-xs text-slate-400 leading-relaxed italic font-medium">"{job.ai_insight}"</p>
+              <p className="text-xs text-slate-400 leading-relaxed italic font-medium mb-4">"{job.ai_insight}"</p>
+              
+              <Button className="w-full bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest h-10 rounded-xl flex items-center gap-2 group">
+                <Zap className="w-3 h-3 group-hover:animate-bounce" />
+                AI TAILOR RESUME FOR THIS ROLE
+              </Button>
            </div>
 
            <div className="pt-4 flex flex-wrap gap-2">
