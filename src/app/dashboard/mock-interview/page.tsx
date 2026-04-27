@@ -60,22 +60,39 @@ export default function MockInterviewPage() {
     }
   };
 
-  // Hybrid Speech Logic: Deepgram for English, Browser for Tamil
+  // Hybrid Sequential Speech Logic: Handles long text by chunking
   const handleAIVoice = async (text: string) => {
     const cleaned = cleanTextForSpeech(text);
+    if (!cleaned) return;
+
+    // Split into sentences for natural playback and API limits
+    const sentences = cleaned.match(/[^.!?]+[.!?]+/g) || [cleaned];
     
-    if (selectedLang.code === "en-US") {
-      const audioBase64 = await speak(cleaned);
-      if (audioBase64) {
-        const audio = new Audio(`data:audio/wav;base64,${audioBase64}`);
-        currentAudioRef.current = audio;
-        audio.play();
+    for (const sentence of sentences) {
+      if (selectedLang.code === "en-US") {
+        const audioBase64 = await speak(sentence);
+        if (audioBase64) {
+          const audio = new Audio(`data:audio/wav;base64,${audioBase64}`);
+          currentAudioRef.current = audio;
+          await new Promise((resolve) => {
+            audio.onended = resolve;
+            audio.onerror = resolve;
+            audio.play();
+          });
+        }
+      } else {
+        // Browser Native Speech for Tamil
+        await new Promise((resolve) => {
+          const utterance = new SpeechSynthesisUtterance(sentence);
+          utterance.lang = selectedLang.code;
+          utterance.onend = resolve;
+          utterance.onerror = resolve;
+          window.speechSynthesis.speak(utterance);
+        });
       }
-    } else {
-      // Browser Native Speech for Tamil
-      const utterance = new SpeechSynthesisUtterance(cleaned);
-      utterance.lang = selectedLang.code;
-      window.speechSynthesis.speak(utterance);
+      
+      // Stop if user silenced or started listening
+      if (!currentAudioRef.current && selectedLang.code === "en-US") break;
     }
   };
 
