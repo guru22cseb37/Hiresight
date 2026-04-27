@@ -49,18 +49,23 @@ export default function CompanyIntelligencePage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-10 py-8 px-4">
-      {/* Header & Search */}
-      <div className="text-center space-y-6">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400">
-          <ShieldCheck className="w-4 h-4" />
-          <span className="text-[10px] font-black uppercase tracking-[0.2em]">Company Intelligence Engine</span>
+    <div className="min-h-screen bg-black text-white p-8 relative overflow-hidden">
+      {/* Cinematic Background Masterpiece */}
+      <div className="absolute inset-0 bg-[url('/global_corporate_hq_masterpiece_bg_1777307511308.png')] bg-cover bg-center opacity-40 scale-105 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-blue-900/30 via-transparent to-black pointer-events-none" />
+
+      <div className="relative z-10 max-w-5xl mx-auto space-y-12 pt-20 text-center">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
+          <ShieldCheck className="w-3 h-3 text-blue-400" />
+          <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Company Intelligence Engine</span>
         </div>
-        <h1 className="text-5xl font-black text-white italic tracking-tighter">TRUST BUT VERIFY.</h1>
-        <p className="text-slate-400 max-w-xl mx-auto font-medium">
-          Identify fake company scams, explore deep business history, and predict interview patterns before you apply.
-        </p>
         
+        <div className="space-y-4">
+          <h1 className="text-6xl font-black text-white italic tracking-tighter uppercase leading-none">TRUST BUT <span className="text-blue-500">VERIFY.</span></h1>
+          <p className="text-slate-400 text-lg font-medium max-w-2xl mx-auto">
+            Identify fake company scams, explore deep business history, and predict interview patterns before you apply.
+          </p>
+        </div>
         <form onSubmit={analyzeCompany} className="max-w-2xl mx-auto relative group">
           <Input 
             value={query}
