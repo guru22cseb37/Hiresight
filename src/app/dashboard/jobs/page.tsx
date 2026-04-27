@@ -255,8 +255,12 @@ export default function JobBoardPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-10 py-8 px-4">
       {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-[32px] bg-slate-900 border border-white/5 p-12">
-        <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+      <div className="relative overflow-hidden rounded-[32px] bg-slate-950 border border-white/5 p-12 group">
+        {/* Elite Dollar Background */}
+        <div className="absolute inset-0 bg-[url('/dollar-bg.png')] bg-cover bg-center opacity-35 group-hover:scale-105 transition-transform duration-[4000ms] pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent pointer-events-none" />
+        
+        <div className="absolute top-0 right-0 p-12 opacity-[0.03] pointer-events-none">
           <Briefcase className="w-64 h-64 text-white" />
         </div>
         
