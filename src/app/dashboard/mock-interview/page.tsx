@@ -169,8 +169,13 @@ export default function MockInterviewPage() {
 
     try {
       const response = await chatWithAI(`${selectedTrack} (Language: ${selectedLang.name})`, text, newHistory);
-      await handleAIVoice(response);
+      
+      // Update UI first
       setChatHistory(prev => [...prev, { role: 'assistant', content: response }]);
+      setIsThinking(false);
+      
+      // Then start speaking
+      await handleAIVoice(response);
       
       setMetrics(prev => ({
         depth: Math.min(100, prev.depth + Math.floor(Math.random() * 15)),
@@ -184,7 +189,6 @@ export default function MockInterviewPage() {
 
     } catch (err) {
       toast.error("AI Response failed.");
-    } finally {
       setIsThinking(false);
     }
   };
