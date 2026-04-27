@@ -157,10 +157,28 @@ export default function DiscoveryPage() {
 }
 
 import { getCompanyNews } from "@/app/actions/news";
+import { tailorResume } from "@/app/actions/tailor";
 
 function DiscoveryCard({ job, onSwipe }: { job: any, onSwipe: (dir: 'like' | 'pass') => void }) {
   const [news, setNews] = useState<any[]>([]);
   const [loadingNews, setLoadingNews] = useState(true);
+  const [tailoredBullet, setTailoredBullet] = useState<string | null>(null);
+  const [isTailoring, setIsTailoring] = useState(false);
+
+  const handleTailor = async () => {
+    setIsTailoring(true);
+    try {
+      const result = await tailorResume(job.role, job.company, job.description);
+      setTailoredBullet(result);
+      toast.success("AI Tailoring Complete!", {
+        description: "Your personalized bullet point is ready to copy."
+      });
+    } catch (err) {
+      toast.error("AI Tailoring failed. Check your API key.");
+    } finally {
+      setIsTailoring(false);
+    }
+  };
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -295,10 +313,44 @@ function DiscoveryCard({ job, onSwipe }: { job: any, onSwipe: (dir: 'like' | 'pa
               </div>
               <p className="text-xs text-slate-400 leading-relaxed italic font-medium mb-4">"{job.ai_insight}"</p>
               
-              <Button className="w-full bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest h-10 rounded-xl flex items-center gap-2 group">
-                <Zap className="w-3 h-3 group-hover:animate-bounce" />
-                AI TAILOR RESUME FOR THIS ROLE
+              <Button 
+                onClick={handleTailor}
+                disabled={isTailoring}
+                className="w-full bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest h-10 rounded-xl flex items-center gap-2 group disabled:opacity-50"
+              >
+                {isTailoring ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <Zap className="w-3 h-3 group-hover:animate-bounce" />
+                )}
+                {isTailoring ? "ANALYZING..." : "AI TAILOR RESUME FOR THIS ROLE"}
               </Button>
+
+              <AnimatePresence>
+                {tailoredBullet && (
+                  <motion.div 
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    className="mt-4 p-4 rounded-xl bg-green-500/10 border border-green-500/20"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                       <span className="text-[9px] font-black text-green-400 uppercase tracking-widest">Tailored Bullet Point</span>
+                       <button 
+                        onClick={() => {
+                          navigator.clipboard.writeText(tailoredBullet);
+                          toast.success("Copied to clipboard!");
+                        }}
+                        className="text-[8px] font-bold text-green-400 hover:underline"
+                       >
+                        COPY
+                       </button>
+                    </div>
+                    <p className="text-[11px] text-slate-300 font-medium leading-relaxed italic">
+                       "{tailoredBullet}"
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
            </div>
 
            {/* LATEST NEWS SECTION */}
