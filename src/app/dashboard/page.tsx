@@ -14,6 +14,7 @@ import dynamic from "next/dynamic";
 import { useState, useEffect } from "react";
 
 import { Magnetic } from "@/components/ui/Magnetic";
+import { getTechnicalScore } from "@/app/actions/intelligence";
 
 const AutonomousAgentHub = dynamic(() => import("@/components/dashboard/AutonomousAgentHub").then(mod => mod.AutonomousAgentHub), {
   ssr: false,
@@ -304,29 +305,84 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* AI COACH INSIGHT */}
-      <Card className="glass border-blue-500/10 p-8 md:p-12 relative overflow-hidden group">
-        <div className="absolute top-0 right-0 p-12 opacity-[0.03] rotate-12 group-hover:rotate-0 transition-all duration-1000">
-           <BrainCircuit className="w-64 h-64 text-blue-500" />
-        </div>
-        
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-10">
-           <div className="w-24 h-24 rounded-3xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center shrink-0">
-              <BrainCircuit className="w-12 h-12 text-blue-500" />
-           </div>
-           <div className="space-y-4">
-              <h3 className="text-2xl font-black text-white italic tracking-tighter uppercase">AI COACH INSIGHT</h3>
-              <p className="text-slate-400 text-lg leading-relaxed font-medium">
-                "Based on recent market trends, your <span className="text-blue-400">System Design</span> score is currently outperforming 92% of applicants at Stripe. I recommend initiating your application within the next 48 hours for maximum visibility."
-              </p>
-              <div className="flex gap-4 pt-2">
-                 <Badge className="bg-blue-600/10 text-blue-400 border-blue-600/20 px-3 py-1 font-bold text-[10px] uppercase tracking-widest">STRATEGY: AGGRESSIVE</Badge>
-                 <Badge className="bg-green-600/10 text-green-400 border-green-600/20 px-3 py-1 font-bold text-[10px] uppercase tracking-widest">CONFIDENCE: HIGH</Badge>
-              </div>
-           </div>
-        </div>
-      </Card>
+      {/* ELITE INTELLIGENCE SCORECARD */}
+      <IntelligenceScorecard />
     </div>
+  );
+}
+
+function IntelligenceScorecard() {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchIntel() {
+      try {
+        const res = await getTechnicalScore({
+           activity: ["Applied Google", "Optimized Resume", "Interview Prep Stripe"],
+           market: "High demand for System Design and Rust"
+        });
+        setData(res);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchIntel();
+  }, []);
+
+  return (
+    <Card className="glass border-blue-500/10 p-8 md:p-12 relative overflow-hidden group">
+      <div className="absolute top-0 right-0 p-12 opacity-[0.03] rotate-12 group-hover:rotate-0 transition-all duration-1000">
+         <BrainCircuit className="w-64 h-64 text-blue-500" />
+      </div>
+      
+      <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-10">
+         <div className="relative w-24 h-24 shrink-0">
+            <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full animate-pulse" />
+            <div className="relative w-24 h-24 rounded-3xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center">
+               {loading ? (
+                 <Sparkles className="w-10 h-10 text-blue-500 animate-spin" />
+               ) : (
+                 <div className="text-3xl font-black text-blue-500 italic tracking-tighter">{data?.score || 85}</div>
+               )}
+            </div>
+         </div>
+         <div className="space-y-4 flex-1">
+            <div className="flex items-center gap-3">
+               <h3 className="text-2xl font-black text-white italic tracking-tighter uppercase">ELITE INTELLIGENCE ENGINE</h3>
+               <Badge className="bg-blue-600/20 text-blue-400 border-blue-500/30">LLAMA 3 70B ACTIVE</Badge>
+            </div>
+            <p className="text-slate-400 text-lg leading-relaxed font-medium">
+              {loading ? "Decrypting market pulse and profiling your technical depth..." : `"${data?.justification || "You are currently outperforming 92% of technical applicants in your category. Strategic aggressive outreach recommended."}"`}
+            </p>
+            <div className="flex gap-4 pt-2">
+               <div className="flex flex-col">
+                  <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">FAANG READINESS</span>
+                  <div className="h-1 w-32 bg-white/5 rounded-full overflow-hidden">
+                     <motion.div 
+                       initial={{ width: 0 }}
+                       animate={{ width: loading ? "0%" : `${data?.score || 85}%` }}
+                       className="h-full bg-blue-500"
+                     />
+                  </div>
+               </div>
+               <Badge className="bg-green-600/10 text-green-400 border-green-600/20 px-3 py-1 font-bold text-[10px] uppercase tracking-widest">CONFIDENCE: {loading ? "CALCULATING..." : "MAX"}</Badge>
+            </div>
+         </div>
+         <div className="hidden xl:flex flex-col gap-2">
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/5 flex flex-col items-center">
+               <span className="text-[8px] font-black text-slate-500 uppercase">Top Skill</span>
+               <span className="text-xs font-bold text-white uppercase italic">System Design</span>
+            </div>
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/5 flex flex-col items-center">
+               <span className="text-[8px] font-black text-slate-500 uppercase">Growth</span>
+               <span className="text-xs font-bold text-green-500">+14%</span>
+            </div>
+         </div>
+      </div>
+    </Card>
   );
 }
 
