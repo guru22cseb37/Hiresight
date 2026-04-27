@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import { supabase, Role } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Building2 } from "lucide-react";
+import RobotScene from "@/components/auth/RobotScene";
 
 // Inner component that uses useSearchParams - must be wrapped in Suspense
 function AuthForm() {
@@ -25,6 +26,24 @@ function AuthForm() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [role, setRole] = useState<Role>("job_seeker");
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const clearBrokenSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error || !session) {
+          // If there's an error (like Refresh Token Not Found), 
+          // sign out to clear the corrupted local storage.
+          await supabase.auth.signOut();
+        }
+      } catch (e) {
+        await supabase.auth.signOut();
+      }
+    };
+    clearBrokenSession();
+  }, []);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +72,10 @@ function AuthForm() {
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        router.push("/onboarding");
+        setIsLoggedIn(true);
+        setTimeout(() => {
+          router.push("/onboarding");
+        }, 2000); // Allow time for robot welcome
       }
     } catch (error: any) {
       toast.error(error.message || "Authentication failed");
@@ -76,9 +98,18 @@ function AuthForm() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      {/* Background blobs */}
-      <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px]" />
-      <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-violet-600/10 rounded-full blur-[100px]" />
+      {/* Premium Cinematic Background */}
+      <div 
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundImage: 'url("/auth-bg.png")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          filter: 'brightness(0.3) contrast(1.1)',
+        }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-transparent to-blue-900/20 z-0" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)] z-0" />
 
       <Link href="/" className="absolute top-8 left-8 flex items-center gap-2 text-slate-400 hover:text-white transition-colors group">
         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
@@ -88,9 +119,13 @@ function AuthForm() {
       <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="w-full max-w-md z-10"
+        className="w-full max-w-5xl z-10 flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16"
       >
-        <Card className="glass border-white/5 p-8 shadow-2xl">
+        <div className="w-full md:w-[450px] lg:w-[500px]">
+          <RobotScene isPasswordFocused={isPasswordFocused} isLoggedIn={isLoggedIn} />
+        </div>
+        <div className="w-full max-w-md">
+          <Card className="glass border-white/5 p-8 shadow-2xl">
           <div className="text-center mb-8">
             <div className="inline-flex w-12 h-12 rounded-xl bg-blue-600 items-center justify-center font-bold text-white mb-4">H</div>
             <h1 className="text-2xl font-bold text-white italic">
@@ -177,6 +212,8 @@ function AuthForm() {
                       className="pl-10 h-12 glass border-white/10"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      onFocus={() => setIsPasswordFocused(true)}
+                      onBlur={() => setIsPasswordFocused(false)}
                       required={!isForgotPassword}
                     />
                   </div>
@@ -241,7 +278,8 @@ function AuthForm() {
               </button>
             </div>
           )}
-        </Card>
+          </Card>
+        </div>
       </motion.div>
     </div>
   );

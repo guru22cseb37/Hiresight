@@ -34,7 +34,7 @@
     }
     .content {
       display: flex;
-      flex-col: column;
+      flex-direction: column;
       gap: 16px;
     }
     .btn {
@@ -84,22 +84,22 @@
   </style>
 </head>
 <body>
-  <div className="header">
-    <div className="logo">H</div>
-    <div className="title">HireSight AI</div>
+  <div class="header">
+    <div class="logo">H</div>
+    <div class="title">HireSight AI</div>
   </div>
 
-  <div className="content">
-    <button id="grab-btn" className="btn">
+  <div class="content">
+    <button id="grab-btn" class="btn">
       Grab Selected Text
     </button>
     <div id="selection-preview"></div>
-    <button id="analyze-btn" className="btn" disabled style="background: #111118; border: 1px solid rgba(255,255,255,0.05); margin-top: 12px;">
+    <button id="analyze-btn" class="btn" disabled style="background: #111118; border: 1px solid rgba(255,255,255,0.05); margin-top: 12px;">
       Send to Analysis
     </button>
   </div>
 
-  <div className="footer">Powered by Groq Intelligence</div>
+  <div class="footer">Powered by Groq Intelligence</div>
 
   <script src="popup.js"></script>
 </body>
