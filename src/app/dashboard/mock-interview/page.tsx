@@ -34,8 +34,14 @@ export default function MockInterviewPage() {
   const stopSpeaking = () => {
     if (currentAudioRef.current) {
       currentAudioRef.current.pause();
-      currentAudioRef.current.currentTime = 0;
+      currentAudioRef.current.src = ""; // Force clear source
       currentAudioRef.current = null;
+    }
+    // Also kill any other hidden audio elements to prevent "Dual Voice"
+    const audios = document.getElementsByTagName('audio');
+    for (let i = 0; i < audios.length; i++) {
+      audios[i].pause();
+      audios[i].src = "";
     }
   };
 
@@ -52,12 +58,12 @@ export default function MockInterviewPage() {
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           const transcript = event.results[i][0].transcript.toLowerCase().trim();
           
-          // VOICE COMMAND: Emergency Stop
-          if (transcript === "stop" || transcript === "silence" || transcript === "shut up") {
+          // URGENT VOICE COMMAND: Stop everything immediately
+          if (transcript.includes("stop") || transcript.includes("silence") || transcript.includes("shut up") || transcript.includes("wait")) {
             stopSpeaking();
             setIsListening(false);
             setUserInput("");
-            toast.info("Voice command: Agent Silenced.");
+            toast.info("STOP Protocol Initiated.");
             return;
           }
 
