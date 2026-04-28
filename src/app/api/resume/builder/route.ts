@@ -6,32 +6,31 @@ export async function POST(req: Request) {
     const { userData, referenceImage, referenceText, jobDesc } = await req.json();
 
     let prompt = `
-      Create the WORLD'S PREMIER, FAANG-Standard LaTeX resume. 
-      This is a HIGH-STAKES task. The result must be PIXEL-PERFECT and visually STUNNING.
+      Create a PROFESSIONAL, HIGH-LEGIBILITY LaTeX resume. 
+      The goal is a clean, standard, single-column tech resume that is easy to read and perfectly formatted.
       
       CANDIDATE DATA: ${JSON.stringify(userData)}
-      TEMPLATE ARCHITECTURE: ${userData.template || "Maverick"}
       
-      LATEX DESIGN SPECIFICATIONS (CRITICAL):
+      STRICT DESIGN RULES (CRITICAL):
       1. DOCUMENT SETUP:
-         - Class: \\documentclass[11pt, letterpaper]{article}
-         - Margins: Use \\usepackage[margin=0.5in]{geometry}
-         - Fonts: Use \\usepackage[default]{inter} or \\usepackage{helvet}. MUST be Sans-Serif and clean.
-         - NO SECTION NUMBERS: Use \\usepackage{titlesec} and \\titleformat{\\section}{\\bfseries\\large\\uppercase}{}{0pt}{}[\\titlerule] to create clean, underlined headers WITHOUT numbering.
+         - Class: \\documentclass[10pt, a4paper]{article}
+         - Margins: \\usepackage[margin=0.6in]{geometry}
+         - Font: \\usepackage[T1]{fontenc} \\usepackage{helvet} \\renewcommand{\\familydefault}{\\sfdefault}
+         - No numbering: Use \\usepackage{titlesec} and \\titleformat{\\section}{\\bfseries\\large\\uppercase}{}{0pt}{}[\\titlerule]
       
-      2. CONTENT STRATEGY:
-         - NO LABELS: Never use labels like "Situation:", "Task:", "Action:", or "Result:". Integrate the impact naturally into professional bullet points.
-         - STRONG ACTION VERBS: Start every bullet with a powerful verb (e.g., "Orchestrated", "Engineered", "Optimized").
-         - QUANTIFIABLE METRICS: Every bullet point MUST have a number (%, $, time, users).
-         - HEADER: Center the name in \\Huge \\bfseries. Below it, center a clean contact line separated by symbols (| or •).
+      2. HEADER:
+         - Centered Name: {\\huge \\bfseries Name}
+         - Centered Info: Clean line below name with Email | Phone | Location
       
-      3. EXPERIENCE & PROJECTS:
-         - Format: \\textbf{Position/Project Title} \\hfill \\textbf{Dates/Tech} \\\\ \\textit{Company/Description}
-         - Use \\begin{itemize}[leftmargin=*, nosep, label=\\textbullet] for bullet points to ensure high density and clean alignment.
+      3. CONTENT LEGIBILITY:
+         - DO NOT use \\Huge or \\Large for body text. Use standard 10pt size.
+         - ALL sections (Summary, Experience, Projects) must be LEFT-ALIGNED.
+         - Bullet Points: Use \\begin{itemize}[leftmargin=*, noitemsep, topsep=2pt, label=\\textbullet].
+         - NO LABELS: Do not use "Situation:", "Task:", etc. Just clean, impactful bullets.
       
-      4. ATS SUPREMACY: Ensure the LaTeX is searchable and uses standard section names.
-      
-      ${jobDesc ? `ATS REVERSE ENGINEERING: Deeply analyze this Job Description: ${jobDesc}. Inject critical technical keywords into the bullet points.` : ""}
+      4. STRUCTURE:
+         - Experience/Project titles in \\textbf{Bold}.
+         - Dates and Tech in \\textit{Italics} or \\hfill \\textbf{Dates}.
       
       Output ONLY the complete, compilable LaTeX code. No preamble, no explanation.
     `;
@@ -39,7 +38,7 @@ export async function POST(req: Request) {
     const latexCode = await callAI({
       messages: [{ role: "user", content: prompt }],
       image_url: referenceImage,
-      model: "llama-3.3-70b-versatile"
+      model: "google/gemini-2.0-flash-001" // Using Gemini for more stable formatting
     });
 
     // Also get an ATS score and improvements
