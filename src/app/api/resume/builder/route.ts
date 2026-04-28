@@ -6,29 +6,40 @@ export async function POST(req: Request) {
     const { userData, referenceImage, referenceText, jobDesc } = await req.json();
 
     let prompt = `
-      Create the WORLD'S BEST, SOVEREIGN-LEVEL LaTeX resume for the following candidate:
+      Create the WORLD'S PREMIER, FAANG-Standard LaTeX resume. 
+      This is a HIGH-STAKES task. The result must be PIXEL-PERFECT and visually STUNNING.
+      
       CANDIDATE DATA: ${JSON.stringify(userData)}
       TEMPLATE ARCHITECTURE: ${userData.template || "Maverick"}
       
-      ${jobDesc ? `ATS REVERSE ENGINEERING: Deeply analyze this Job Description: ${jobDesc}. Identify critical technical keywords, soft skills, and industry terms. INJECT these keywords semantically into the resume bullet points while maintaining a natural, powerful tone.` : ""}
+      LATEX DESIGN SPECIFICATIONS (CRITICAL):
+      1. DOCUMENT SETUP:
+         - Class: \\documentclass[11pt, letterpaper]{article}
+         - Margins: Use \\usepackage[margin=0.5in]{geometry}
+         - Fonts: Use \\usepackage[default]{inter} or \\usepackage{helvet}. MUST be Sans-Serif and clean.
+         - NO SECTION NUMBERS: Use \\usepackage{titlesec} and \\titleformat{\\section}{\\bfseries\\large\\uppercase}{}{0pt}{}[\\titlerule] to create clean, underlined headers WITHOUT numbering.
       
-      ${referenceText || referenceImage ? `NEURAL TEMPLATE CLONING: Analyze the provided reference image/text. Replicate its structural DNA, including margin ratios, section spacing, and font hierarchy, with pixel-perfect LaTeX accuracy.` : `Use the '${userData.template || "Maverick"}' architecture:
-        - Maverick: Modern, dual-column if necessary, bold sans-serif headers, clean impact.
-        - Executive: Classic single-column, serif fonts, authoritative spacing, professional elegance.
-        - Engineer: High-density technical layout, bold tech stacks per project, monochrome, ultra-precise.`}
+      2. CONTENT STRATEGY:
+         - NO LABELS: Never use labels like "Situation:", "Task:", "Action:", or "Result:". Integrate the impact naturally into professional bullet points.
+         - STRONG ACTION VERBS: Start every bullet with a powerful verb (e.g., "Orchestrated", "Engineered", "Optimized").
+         - QUANTIFIABLE METRICS: Every bullet point MUST have a number (%, $, time, users).
+         - HEADER: Center the name in \\Huge \\bfseries. Below it, center a clean contact line separated by symbols (| or •).
       
-      CRITICAL PERFORMANCE REQUIREMENTS:
-      1. Output ONLY the complete LaTeX code. No meta-talk.
-      2. QUANTifiable IMPACT: Every single bullet point MUST contain a hard number (%, $, time saved, users reached). NO EXCEPTIONS.
-      3. SEMANTIC KEYWORD INJECTION: If a JD is provided, ensure the resume has 100% keyword coverage for that specific role.
-      4. ATS SUPREMACY: Use geometry, hyperref, and enumitem. Ensure headers are standard (Experience, Projects, Education, Skills).
-      5. PROFESSIONAL SUMMARY: Create a high-authority 'Executive Profile' that positions the candidate as a leader in their field.
+      3. EXPERIENCE & PROJECTS:
+         - Format: \\textbf{Position/Project Title} \\hfill \\textbf{Dates/Tech} \\\\ \\textit{Company/Description}
+         - Use \\begin{itemize}[leftmargin=*, nosep, label=\\textbullet] for bullet points to ensure high density and clean alignment.
+      
+      4. ATS SUPREMACY: Ensure the LaTeX is searchable and uses standard section names.
+      
+      ${jobDesc ? `ATS REVERSE ENGINEERING: Deeply analyze this Job Description: ${jobDesc}. Inject critical technical keywords into the bullet points.` : ""}
+      
+      Output ONLY the complete, compilable LaTeX code. No preamble, no explanation.
     `;
 
     const latexCode = await callAI({
       messages: [{ role: "user", content: prompt }],
-      image_url: referenceImage, // This will be handled by callAI if present
-      model: referenceImage ? "google/gemini-2.0-flash-001" : "openai/gpt-4o-mini"
+      image_url: referenceImage,
+      model: "llama-3.3-70b-versatile"
     });
 
     // Also get an ATS score and improvements
