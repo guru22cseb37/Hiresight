@@ -99,7 +99,7 @@ export default function DiscoveryPage() {
       if (error) throw error;
 
       // 3. Neural Match Simulation (Rectifying properties)
-      const matches = (jobData || []).map(j => ({
+      const matches = (jobData || []).map((j: any) => ({
         id: j.id,
         company: j.company_name || "Enterprise Partner",
         role: j.role,

@@ -48,7 +48,7 @@ export default function CandidatesPage() {
 
       if (error) throw error;
 
-      const realCandidates = (data || []).map(c => {
+      const realCandidates = (data || []).map((c: any) => {
         // Extract details from notes if available (e.g. "Applied for AI Developer at HIRESIGHT. Experience: Fresher (0-1 Years). Location: Remote.")
         const notesStr = c.notes || "";
         const expMatch = notesStr.match(/Experience: (.*?)\./);

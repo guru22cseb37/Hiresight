@@ -52,7 +52,7 @@ export default function JobBoardPage() {
       // Note: In demo setup, email matches if real candidate record was created
       const { data } = await supabase.from("candidates").select("job_id").eq("email", user.email);
       if (data) {
-        setAppliedJobIds(new Set(data.map(d => d.job_id).filter(Boolean)));
+        setAppliedJobIds(new Set(data.map((d: any) => d.job_id).filter(Boolean)));
       }
     };
     fetchApplied();

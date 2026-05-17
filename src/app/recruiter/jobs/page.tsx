@@ -45,7 +45,7 @@ export default function JobsManagementPage() {
       if (error) throw error;
 
       // Map real jobs to the UI structure and merge with mocks
-      const realJobs = (data || []).map(j => {
+      const realJobs = (data || []).map((j: any) => {
         const cands = j.candidates || [];
         return {
           id: j.id,
