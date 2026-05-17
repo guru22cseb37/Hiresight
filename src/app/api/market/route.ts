@@ -1,11 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-// Use Service Role Key to bypass RLS for internal automation
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { supabase as supabaseAdmin } from "@/lib/supabase";
 
 export async function POST(req: Request) {
   try {

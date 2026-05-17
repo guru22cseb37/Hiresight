@@ -69,6 +69,7 @@ export default function UpdatePasswordPage() {
           <Button 
             className="w-full h-12 bg-blue-600 hover:bg-blue-500"
             onClick={() => router.push("/auth")}
+            suppressHydrationWarning
           >
             Go to Login
           </Button>
@@ -134,6 +135,7 @@ export default function UpdatePasswordPage() {
               type="submit" 
               className="w-full h-12 bg-blue-600 hover:bg-blue-500 text-white mt-4"
               disabled={loading}
+              suppressHydrationWarning
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Update Password"}
             </Button>

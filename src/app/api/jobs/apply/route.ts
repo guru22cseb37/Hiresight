@@ -12,12 +12,7 @@ export async function POST(req: Request) {
       user = { id: "00000000-0000-0000-0000-000000000000", email: "demo@hiresight.ai" } as any;
     }
 
-    // Use service role key to bypass RLS (since candidate is inserting into recruiter's candidates)
-    const { createClient } = require('@supabase/supabase-js');
-    const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const supabaseAdmin = supabase;
 
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(jobId);
 

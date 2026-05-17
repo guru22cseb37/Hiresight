@@ -195,6 +195,7 @@ function AuthForm() {
                   variant="outline" 
                   className="w-full h-12 glass border-white/10 text-white gap-3 hover:bg-white/5 active:scale-95 transition-all"
                   onClick={handleGoogleAuth}
+                  suppressHydrationWarning
                 >
                   <Chrome className="w-5 h-5" />
                   Continue with Google
@@ -249,6 +250,7 @@ function AuthForm() {
                       type="button"
                       onClick={() => setIsForgotPassword(true)}
                       className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                      suppressHydrationWarning
                     >
                       Forgot?
                     </button>
@@ -302,6 +304,7 @@ function AuthForm() {
                 type="submit" 
                 className="w-full h-12 bg-blue-600 hover:bg-blue-500 text-white mt-4"
                 disabled={loading}
+                suppressHydrationWarning
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (isForgotPassword ? "Send Recovery Link" : (isSignUp ? "Sign Up" : "Log In"))}
               </Button>
@@ -323,6 +326,7 @@ function AuthForm() {
               <button 
                 onClick={() => setIsSignUp(!isSignUp)}
                 className="text-sm text-slate-400 hover:text-blue-400 transition-colors"
+                suppressHydrationWarning
               >
                 {isSignUp ? "Already have an account? Log in" : "Don't have an account? Sign up"}
               </button>
